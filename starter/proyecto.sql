@@ -193,5 +193,110 @@ WHERE is_active = 0; -- IT WILL SHOW THE INACTIVE AIRCRAFTS
 DELETE FROM aircraft
 WHERE is_active = 0; -- Deleting the inactive aircrafts from the database
 
+-- =============================================================
+-- week 4 SELECT statements and queries(DQL:Data Query Language)
+-- =============================================================
 
+INSERT INTO aircraft (model, capacity, registration, manufacturer, is_active) VALUES
+('Boeing 737-800', 162, 'HK-5001', 'Boeing', 1), ('Airbus A320', 180, 'HK-5002', 'Airbus', 1),
+('Boeing 787-8', 250, 'HK-5003', 'Boeing', 1), ('Embraer E190', 100, 'HK-5004', 'Embraer', 1),
+('Airbus A330', 252, 'HK-5005', 'Airbus', 1), ('ATR 72-600', 70, 'HK-5006', 'ATR', 1),
+('Boeing 777-200', 310, 'HK-5007', 'Boeing', 1), ('Airbus A321', 220, 'HK-5008', 'Airbus', 1),
+('Cessna 208', 12, 'HK-5009', 'Cessna', 1), ('Bombardier CRJ700', 78, 'HK-5010', 'Bombardier', 0),
+('Airbus A350', 325, 'HK-5011', 'Airbus', 1), ('Boeing 747-400', 416, 'HK-5012', 'Boeing', 1),
+('Gulfstream G650', 19, 'HK-5013', 'Gulfstream', 1), ('Dash 8 Q400', 76, 'HK-5014', 'De Havilland', 1),
+('Boeing 737 MAX 9', 178, 'HK-5015', 'Boeing', 1), ('Airbus A319', 144, 'HK-5016', 'Airbus', 1),
+('Embraer E175', 76, 'HK-5017', 'Embraer', 1), ('Airbus A220', 135, 'HK-5018', 'Airbus', 1),
+('Boeing 767-300', 210, 'HK-5019', 'Boeing', 0), ('Pilatus PC-12', 9, 'HK-5020', 'Pilatus', 1);
+
+INSERT INTO passengers (first_name, last_name, email, phone_number, passport_id) VALUES
+('Juan', 'Perez', 'j.perez@mail.com', '300111', 'PAS-101'), ('Maria', 'Lopez', 'm.lopez@mail.com', '300222', 'PAS-102'),
+('Carlos', 'Ruiz', 'c.ruiz@mail.com', '300333', 'PAS-103'), ('Ana', 'Silva', 'a.silva@mail.com', '300444', 'PAS-104'),
+('Luis', 'Mesa', 'l.mesa@mail.com', '300555', 'PAS-105'), ('Rosa', 'Diaz', 'r.diaz@mail.com', '300666', 'PAS-106'),
+('Jorge', 'Gomez', 'j.gomez@mail.com', '300777', 'PAS-107'), ('Elena', 'Vega', 'e.vega@mail.com', '300888', 'PAS-108'),
+('Pedro', 'Sanz', 'p.sanz@mail.com', '300999', 'PAS-109'), ('Lucia', 'Cruz', 'l.cruz@mail.com', '300000', 'PAS-110'),
+('David', 'Mora', 'd.mora@mail.com', '300112', 'PAS-111'), ('Sofia', 'Leon', 's.leon@mail.com', '300113', 'PAS-112'),
+('Hugo', 'Rios', 'h.rios@mail.com', '300114', 'PAS-113'), ('Paula', 'Luna', 'p.luna@mail.com', '300115', 'PAS-114'),
+('Ivan', 'Soto', 'i.soto@mail.com', '300116', 'PAS-115'), ('Sara', 'Peña', 's.pena@mail.com', '300117', 'PAS-116'),
+('Mario', 'Cano', 'm.cano@mail.com', '300118', 'PAS-117'), ('Ines', 'Vidal', 'i.vidal@mail.com', '300119', 'PAS-118'),
+('Raul', 'Lara', 'r.lara@mail.com', '300120', 'PAS-119'), ('Clara', 'Toro', 'c.toro@mail.com', '300121', 'PAS-120');
+
+INSERT INTO crews (captain_name, copilot_name, attendants_count, base_airport) VALUES
+('Capt. 01', 'Cop. 01', 4, 'SKBO'), ('Capt. 02', 'Cop. 02', 5, 'SKRG'), ('Capt. 03', 'Cop. 03', 3, 'SKCL'),
+('Capt. 04', 'Cop. 04', 6, 'SKBO'), ('Capt. 05', 'Cop. 05', 4, 'SKCG'), ('Capt. 06', 'Cop. 06', 2, 'SKBQ'),
+('Capt. 07', 'Cop. 07', 5, 'SKBO'), ('Capt. 08', 'Cop. 08', 3, 'SKRG'), ('Capt. 09', 'Cop. 09', 4, 'SKCL'),
+('Capt. 10', 'Cop. 10', 6, 'SKBO'), ('Capt. 11', 'Cop. 11', 5, 'SKCG'), ('Capt. 12', 'Cop. 12', 4, 'SKBQ'),
+('Capt. 13', 'Cop. 13', 3, 'SKBO'), ('Capt. 14', 'Cop. 14', 2, 'SKRG'), ('Capt. 15', 'Cop. 15', 5, 'SKCL'),
+('Capt. 16', 'Cop. 16', 4, 'SKBO'), ('Capt. 17', 'Cop. 17', 6, 'SKCG'), ('Capt. 18', 'Cop. 18', 3, 'SKBQ'),
+('Capt. 19', 'Cop. 19', 4, 'SKBO'), ('Capt. 20', 'Cop. 20', 5, 'SKRG');
+
+INSERT INTO flights (flight_code, origin_icao, destination_icao, departure_at, arrival_at, aircraft_id, crew_id, flight_status) VALUES
+('FL-01', 'SKBO', 'KMIA', '2026-06-01 08:00', '2026-06-01 12:00', 1, 1, 'Scheduled'),
+('FL-02', 'SKBO', 'LEMD', '2026-06-01 10:00', '2026-06-01 22:00', 2, 2, 'Scheduled'),
+('FL-03', 'SKRG', 'MPTO', '2026-06-01 14:00', '2026-06-01 16:00', 3, 3, 'Delayed'),
+('FL-04', 'SKCL', 'SABE', '2026-06-01 16:00', '2026-06-01 22:00', 4, 4, 'Scheduled'),
+('FL-05', 'SKBO', 'KJFK', '2026-06-01 20:00', '2026-06-02 04:00', 5, 5, 'Scheduled'),
+('FL-06', 'KMIA', 'SKBO', '2026-06-02 08:00', '2026-06-02 12:00', 1, 6, 'Scheduled'),
+('FL-07', 'LEMD', 'SKBO', '2026-06-02 10:00', '2026-06-02 22:00', 2, 7, 'Scheduled'),
+('FL-08', 'MPTO', 'SKRG', '2026-06-02 14:00', '2026-06-02 16:00', 3, 8, 'Scheduled'),
+('FL-09', 'SABE', 'SKCL', '2026-06-02 16:00', '2026-06-02 22:00', 4, 9, 'Scheduled'),
+('FL-10', 'KJFK', 'SKBO', '2026-06-02 20:00', '2026-06-03 04:00', 5, 10, 'Scheduled'),
+('FL-11', 'SKBO', 'SKRG', '2026-06-03 07:00', '2026-06-03 08:00', 6, 11, 'Scheduled'),
+('FL-12', 'SKRG', 'SKBO', '2026-06-03 09:00', '2026-06-03 10:00', 6, 12, 'Scheduled'),
+('FL-13', 'SKBO', 'SKCL', '2026-06-03 11:00', '2026-06-03 12:00', 7, 13, 'Cancelled'),
+('FL-14', 'SKCL', 'SKBO', '2026-06-03 13:00', '2026-06-03 14:00', 7, 14, 'Scheduled'),
+('FL-15', 'SKBO', 'SKCG', '2026-06-03 15:00', '2026-06-03 16:30', 8, 15, 'Scheduled'),
+('FL-16', 'SKCG', 'SKBO', '2026-06-03 17:30', '2026-06-03 19:00', 8, 16, 'Scheduled'),
+('FL-17', 'SKBO', 'SKBQ', '2026-06-03 20:00', '2026-06-03 21:30', 9, 17, 'Scheduled'),
+('FL-18', 'SKBQ', 'SKBO', '2026-06-03 22:30', '2026-06-04 00:00', 9, 18, 'Scheduled'),
+('FL-19', 'SKBO', 'LEMD', '2026-06-04 06:00', '2026-06-04 18:00', 11, 19, 'Scheduled'),
+('FL-20', 'LEMD', 'SKBO', '2026-06-05 06:00', '2026-06-05 18:00', 11, 20, 'Scheduled');
+
+SELECT 
+    flight_code AS Codigo_Vuelo,
+    origin_icao AS Aeropuerto_Origen,
+    destination_icao AS Aeropuerto_Destino,
+    departure_at AS Fecha_Salida
+FROM flights
+WHERE origin_icao = 'SKBO' AND flight_status = 'Scheduled';
+
+SELECT 
+    first_name AS Nombre,
+    last_name AS Apellido,
+    passport_id AS Numero_Pasaporte
+FROM passengers;
+
+SELECT 
+    model AS Modelo_Avion,
+    capacity AS Capacidad_Pasajeros
+FROM aircraft
+ORDER BY capacity DESC;
+
+SELECT flight_code, flight_status 
+FROM flights 
+WHERE flight_status = 'Delayed' OR flight_status = 'Cancelled';
+
+SELECT model, capacity 
+FROM aircraft 
+WHERE capacity >= 200
+ORDER BY capacity ASC
+LIMIT 5
+OFFSET 0;
+
+SELECT model, capacity 
+FROM aircraft 
+WHERE capacity >= 200
+ORDER BY capacity ASC
+LIMIT 5
+OFFSET 5;
+
+SELECT flight_code, departure_at 
+FROM flights 
+WHERE departure_at >= '2026-06-01 00:00' AND departure_at < '2026-07-01 00:00'
+ORDER BY departure_at ASC;
+
+SELECT captain_name, copilot_name
+FROM crews 
+WHERE attendants_count >= 5
+ORDER BY captain_name ASC;
 
