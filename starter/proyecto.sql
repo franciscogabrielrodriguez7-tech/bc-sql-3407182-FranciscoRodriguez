@@ -252,6 +252,47 @@ INSERT INTO flights (flight_code, origin_icao, destination_icao, departure_at, a
 ('FL-19', 'SKBO', 'LEMD', '2026-06-04 06:00', '2026-06-04 18:00', 11, 19, 'Scheduled'),
 ('FL-20', 'LEMD', 'SKBO', '2026-06-05 06:00', '2026-06-05 18:00', 11, 20, 'Scheduled');
 
+INSERT INTO flights (
+    flight_code,
+    origin_icao,
+    destination_icao,
+    departure_at,
+    arrival_at,
+    aircraft_id,
+    crew_id,
+    flight_status
+) VALUES
+('FL-01', 'SKBO', 'KMIA', '2026-06-01 08:00', '2026-06-01 12:00', 1, 1, 'Scheduled'),
+('FL-02', 'SKRG', 'SKCL', '2026-06-01 09:30', '2026-06-01 10:40', 2, 2, 'Boarding'),
+('FL-03', 'SKBO', 'SEQM', '2026-06-01 07:15', '2026-06-01 09:10', 3, 3, 'Departed'),
+('FL-04', 'SKCG', 'MPTO', '2026-06-01 11:00', '2026-06-01 12:25', 4, 4, 'Scheduled'),
+('FL-05', 'SKBQ', 'TNCM', '2026-06-01 13:45', '2026-06-01 16:30', 5, 5, 'Delayed'),
+('FL-06', 'SKBO', 'KLAX', '2026-06-01 15:00', '2026-06-01 22:00', 6, 6, 'Scheduled'),
+('FL-07', 'SKSM', 'SKBO', '2026-06-01 06:50', '2026-06-01 08:15', 7, 7, 'Arrived'),
+('FL-08', 'SKCL', 'MMMX', '2026-06-01 10:20', '2026-06-01 15:40', 8, 8, 'Scheduled'),
+('FL-09', 'SKBO', 'LEMD', '2026-06-01 17:30', '2026-06-02 08:45', 9, 9, 'Boarding'),
+('FL-10', 'SKPE', 'SKRG', '2026-06-01 12:10', '2026-06-01 13:00', 10, 10, 'Cancelled'),
+('FL-11', 'SKBO', 'LFPG', '2026-06-01 20:00', '2026-06-02 11:20', 11, 11, 'Scheduled'),
+('FL-12', 'SKRG', 'KJFK', '2026-06-01 14:00', '2026-06-01 20:30', 12, 12, 'Delayed'),
+('FL-13', 'SKCG', 'MUHA', '2026-06-01 09:00', '2026-06-01 11:50', 13, 13, 'Scheduled'),
+('FL-14', 'SKMR', 'SKBO', '2026-06-01 07:45', '2026-06-01 09:00', 14, 14, 'Departed'),
+('FL-15', 'SKBO', 'SBGR', '2026-06-01 16:20', '2026-06-01 23:10', 15, 15, 'Scheduled'),
+('FL-16', 'SKPS', 'SKCL', '2026-06-01 05:50', '2026-06-01 07:00', 16, 16, 'Arrived'),
+('FL-17', 'SKAR', 'SKBO', '2026-06-01 08:35', '2026-06-01 09:40', 17, 17, 'Boarding'),
+('FL-18', 'SKBQ', 'KATL', '2026-06-01 18:00', '2026-06-02 00:15', 18, 18, 'Scheduled'),
+('FL-19', 'SKCC', 'TNCA', '2026-06-01 13:20', '2026-06-01 15:00', 19, 19, 'Delayed'),
+('FL-20', 'SKBO', 'EHAM', '2026-06-01 21:00', '2026-06-02 13:30', 20, 20, 'Scheduled'),
+('FL-21', 'SKRG', 'SABE', '2026-06-01 12:45', '2026-06-01 19:10', 21, 21, 'Scheduled'),
+('FL-22', 'SKCL', 'MMUN', '2026-06-01 11:25', '2026-06-01 15:40', 22, 22, 'Cancelled'),
+('FL-23', 'SKCG', 'KORD', '2026-06-01 22:00', '2026-06-02 05:45', 23, 23, 'Scheduled'),
+('FL-24', 'SKPE', 'SKSM', '2026-06-01 09:10', '2026-06-01 10:05', 24, 24, 'Arrived'),
+('FL-25', 'SKBO', 'RJTT', '2026-06-01 23:55', '2026-06-02 19:30', 25, 25, 'Scheduled'),
+('FL-26', 'SKBG', 'SKBO', '2026-06-01 06:30', '2026-06-01 07:20', 26, 26, 'Departed'),
+('FL-27', 'SKRG', 'CYYZ', '2026-06-01 15:40', '2026-06-01 22:30', 27, 27, 'Boarding'),
+('FL-28', 'SKCL', 'SCLP', '2026-06-01 18:50', '2026-06-01 23:20', 28, 28, 'Delayed'),
+('FL-29', 'SKBO', 'OMDB', '2026-06-01 19:45', '2026-06-02 17:10', 29, 29, 'Scheduled'),
+('FL-30', 'SKSM', 'SKCG', '2026-06-01 07:00', '2026-06-01 08:00', 30, 30, 'Arrived');
+
 SELECT 
     flight_code AS Codigo_Vuelo,
     origin_icao AS Aeropuerto_Origen,
@@ -300,3 +341,199 @@ FROM crews
 WHERE attendants_count >= 5
 ORDER BY captain_name ASC;
 
+
+-- =============================================================
+-- week 5 OPERATORS AND FILTERS (BETWEEN, IN, LIKE, NOT, OR) 
+-- =============================================================
+
+-- datos adicionales para la base de datos
+
+INSERT INTO aircraft (model, capacity, registration, manufacturer, is_active) VALUES
+( 'Airbus A320', 180, 'HK-3201', 'Airbus', 0),
+( 'Boeing 737-800', 189, 'HK-4521', 'Boeing', 1),
+( 'Airbus A321neo', 220, 'HK-7820', 'Airbus', 1),
+( 'Boeing 787-9 Dreamliner', 296, 'HK-9901', 'Boeing', 1),
+( 'ATR 72-600', 72, 'HK-2105', 'ATR', 1),
+( 'Embraer E190', 114, 'HK-3344', 'Embraer', 1),
+( 'Bombardier CRJ900', 90, 'HK-7750', 'Bombardier', 0),
+( 'Airbus A330-300', 300, 'HK-8822', 'Airbus', 1),
+( 'Boeing 777-300ER', 396, 'HK-6610', 'Boeing', 1),
+( 'Cessna 172', 4, 'HK-1001', 'Cessna', 1),
+( 'Airbus A350-900', 325, 'HK-5502', 'Airbus', 1),
+( 'Boeing 747-8', 467, 'HK-7478', 'Boeing', 0),
+( 'Embraer E175', 88, 'HK-1700', 'Embraer', 1),
+( 'ATR 42-500', 48, 'HK-4250', 'ATR', 1),
+( 'Boeing 737 MAX 8', 210, 'HK-8080', 'Boeing', 1),
+( 'Airbus A220-300', 145, 'HK-2230', 'Airbus', 1),
+( 'Bombardier Dash 8 Q400', 82, 'HK-8400', 'Bombardier', 1),
+( 'Boeing 767-300F', 269, 'HK-7630', 'Boeing', 0),
+( 'Airbus A319', 156, 'HK-3199', 'Airbus', 1),
+( 'Gulfstream G650', 18, 'HK-6500', 'Gulfstream', 1),
+( 'Pilatus PC-12', 9, 'HK-1212', 'Pilatus', 1),
+( 'Boeing 737-700', 149, 'HK-7377', 'Boeing', 0),
+( 'Airbus A321XLR', 244, 'HK-3215', 'Airbus', 1),
+( 'Lockheed C-130 Hercules', 92, 'HK-1300', 'Lockheed Martin', 1),
+( 'Dassault Falcon 8X', 16, 'HK-8008', 'Dassault', 1),
+( 'Beechcraft King Air 350', 11, 'HK-3501', 'Beechcraft', 1),
+( 'Antonov An-124', 88, 'HK-1240', 'Antonov', 0),
+( 'Boeing 757-200', 239, 'HK-7520', 'Boeing', 1),
+( 'Airbus BelugaXL', 220, 'HK-XL01', 'Airbus', 0),
+( 'Sukhoi Superjet 100', 98, 'HK-SS10', 'Sukhoi', 1);
+
+INSERT INTO crews ( captain_name, copilot_name, attendants_count, base_airport) VALUES
+( 'Cap. Andrés Silva', 'Cop. Luis Martínez', 4, 'Bogotá'),
+( 'Cap. María González', 'Cop. Felipe Torres', 5, 'Medellín'),
+( 'Cap. Juan Esteban Ruiz', 'Cop. Camila Herrera', 3, 'Cali'),
+( 'Cap. Sebastián Rojas', 'Cop. Daniel Castro', 6, 'Cartagena'),
+( 'Cap. Laura Mendoza', 'Cop. Nicolás Vega', 4, 'Barranquilla'),
+( 'Cap. Ricardo Pérez', 'Cop. Andrea López', 5, 'Bogotá'),
+( 'Cap. Valentina Ramírez', 'Cop. Javier Morales', 4, 'Pereira'),
+( 'Cap. Carlos Méndez', 'Cop. Paula Romero', 3, 'Bucaramanga'),
+( 'Cap. Esteban Navarro', 'Cop. Sara Jiménez', 5, 'Santa Marta'),
+( 'Cap. Miguel Ángel Duarte', 'Cop. Lina Parra', 4, 'Bogotá'),
+( 'Cap. José Cárdenas', 'Cop. Tatiana León', 6, 'Cali'),
+( 'Cap. Cristian Vargas', 'Cop. Ángela Ortiz', 4, 'Medellín'),
+( 'Cap. Mauricio Salazar', 'Cop. Juliana Pineda', 5, 'Cartagena'),
+( 'Cap. Diego Herrera', 'Cop. Karen Suárez', 3, 'Montería'),
+( 'Cap. Fernando Beltrán', 'Cop. Alejandra Cruz', 4, 'Bogotá'),
+( 'Cap. Sergio Molina', 'Cop. Iván Restrepo', 5, 'Pasto'),
+( 'Cap. Catalina Gil', 'Cop. Andrés Mejía', 4, 'Armenia'),
+( 'Cap. Óscar Rincón', 'Cop. Natalia Duarte', 6, 'Barranquilla'),
+( 'Cap. Jorge Villalba', 'Cop. Melissa Cano', 3, 'Cúcuta'),
+( 'Cap. Héctor Fuentes', 'Cop. Diana Calderón', 4, 'Bogotá'),
+( 'Cap. Manuel Quintero', 'Cop. Paula Sánchez', 5, 'Medellín'),
+( 'Cap. Andrés Cepeda', 'Cop. Verónica Ruiz', 4, 'Cali'),
+( 'Cap. Tomás Aguilar', 'Cop. Sofía Valencia', 6, 'Cartagena'),
+( 'Cap. Eduardo Patiño', 'Cop. Gabriela Mora', 3, 'Pereira'),
+( 'Cap. Álvaro Benítez', 'Cop. Natalia Vélez', 5, 'Santa Marta'),
+( 'Cap. Felipe Arango', 'Cop. Isabel Torres', 4, 'Bogotá'),
+( 'Cap. Leonardo Muñoz', 'Cop. Camilo Franco', 5, 'Bucaramanga'),
+( 'Cap. Julián Acosta', 'Cop. Marcela Arias', 4, 'Cali'),
+( 'Cap. Víctor Solano', 'Cop. Daniela Nieto', 6, 'Medellín'),
+( 'Cap. Ramiro Casas', 'Cop. Laura Nieto', 3, 'Bogotá');
+
+INSERT OR IGNORE INTO passengers (first_name, last_name, email, phone_number, passport_id) VALUES
+('Juan', 'Perez', 'j.perez@mail.com', '300111', 'PAS-101'),
+('María', 'Gómez', 'm.gomez@mail.com', '300112', 'PAS-102'),
+('Carlos', 'Rodríguez', 'c.rodriguez@mail.com', '300113', 'PAS-103'),
+('Laura', 'Martínez', 'l.martinez@mail.com', '300114', 'PAS-104'),
+('Andrés', 'Silva', 'a.silva@mail.com', '300115', 'PAS-105'),
+('Camila', 'Torres', 'c.torres@mail.com', '300116', 'PAS-106'),
+('Felipe', 'Ramírez', 'f.ramirez@mail.com', '300117', 'PAS-107'),
+('Valentina', 'Castro', 'v.castro@mail.com', '300118', 'PAS-108'),
+('Sebastián', 'Morales', 's.morales@mail.com', '300119', 'PAS-109'),
+('Daniela', 'Herrera', 'd.herrera@mail.com', '300120', 'PAS-110'),
+('Jorge', 'Navarro', 'j.navarro@mail.com', '300121', 'PAS-111'),
+('Natalia', 'Jiménez', 'n.jimenez@mail.com', '300122', 'PAS-112'),
+('Ricardo', 'Mendoza', 'r.mendoza@mail.com', '300123', 'PAS-113'),
+('Paula', 'Vega', 'p.vega@mail.com', '300124', 'PAS-114'),
+('Miguel', 'Rojas', 'm.rojas@mail.com', '300125', 'PAS-115'),
+('Sara', 'León', 's.leon@mail.com', '300126', 'PAS-116'),
+('Cristian', 'Ortega', 'c.ortega@mail.com', '300127', 'PAS-117'),
+('Tatiana', 'Suárez', 't.suarez@mail.com', '300128', 'PAS-118'),
+('Mauricio', 'Pineda', 'm.pineda@mail.com', '300129', 'PAS-119'),
+('Gabriela', 'Cruz', 'g.cruz@mail.com', '300130', 'PAS-120'),
+('Esteban', 'Parra', 'e.parra@mail.com', '300131', 'PAS-121'),
+('Diana', 'Acosta', 'd.acosta@mail.com', '300132', 'PAS-122'),
+('Óscar', 'Benítez', 'o.benitez@mail.com', '300133', 'PAS-123'),
+('Juliana', 'Franco', 'j.franco@mail.com', '300134', 'PAS-124'),
+('Héctor', 'Aguilar', 'h.aguilar@mail.com', '300135', 'PAS-125'),
+('Melissa', 'Valencia', 'm.valencia@mail.com', '300136', 'PAS-126'),
+('Leonardo', 'Fuentes', 'l.fuentes@mail.com', '300137', 'PAS-127'),
+('Isabel', 'Mora', 'i.mora@mail.com', '300138', 'PAS-128'),
+('Tomás', 'Restrepo', 't.restrepo@mail.com', '300139', 'PAS-129'),
+('Verónica', 'Cano', 'v.cano@mail.com', '300140', 'PAS-130');
+
+
+INSERT INTO flights (
+    flight_code,
+    origin_icao,
+    destination_icao,
+    departure_at,
+    arrival_at,
+    aircraft_id,
+    crew_id,
+    flight_status
+) VALUES
+('FL-101', 'SKBO', 'KMIA', '2026-06-01 08:00', '2026-06-01 12:00', 1, 1, 'Scheduled'),
+('FL-102', 'SKRG', 'SKCL', '2026-06-01 09:30', '2026-06-01 10:40', 2, 2, 'Scheduled'),
+('FL-103', 'SKBO', 'SEQM', '2026-06-01 07:15', '2026-06-01 09:10', 3, 3, 'In-flight'),
+('FL-104', 'SKCG', 'MPTO', '2026-06-01 11:00', '2026-06-01 12:25', 4, 4, 'Scheduled'),
+('FL-105', 'SKBQ', 'TNCM', '2026-06-01 13:45', '2026-06-01 16:30', 5, 5, 'Delayed'),
+('FL-106', 'SKBO', 'KLAX', '2026-06-01 15:00', '2026-06-01 22:00', 6, 6, 'Scheduled'),
+('FL-107', 'SKSM', 'SKBO', '2026-06-01 06:50', '2026-06-01 08:15', 7, 7, 'Arrived'),
+('FL-108', 'SKCL', 'MMMX', '2026-06-01 10:20', '2026-06-01 15:40', 8, 8, 'Scheduled'),
+('FL-109', 'SKBO', 'LEMD', '2026-06-01 17:30', '2026-06-02 08:45', 9, 9, 'Scheduled'),
+('FL-110', 'SKPE', 'SKRG', '2026-06-01 12:10', '2026-06-01 13:00', 10, 10, 'Cancelled'),
+('FL-111', 'SKBO', 'LFPG', '2026-06-01 20:00', '2026-06-02 11:20', 11, 11, 'Scheduled'),
+('FL-112', 'SKRG', 'KJFK', '2026-06-01 14:00', '2026-06-01 20:30', 12, 12, 'Delayed'),
+('FL-113', 'SKCG', 'MUHA', '2026-06-01 09:00', '2026-06-01 11:50', 13, 13, 'Scheduled'),
+('FL-114', 'SKMR', 'SKBO', '2026-06-01 07:45', '2026-06-01 09:00', 14, 14, 'In-flight'),
+('FL-115', 'SKBO', 'SBGR', '2026-06-01 16:20', '2026-06-01 23:10', 15, 15, 'Scheduled'),
+('FL-116', 'SKPS', 'SKCL', '2026-06-01 05:50', '2026-06-01 07:00', 16, 16, 'Arrived'),
+('FL-117', 'SKAR', 'SKBO', '2026-06-01 08:35', '2026-06-01 09:40', 17, 17, 'Scheduled'),
+('FL-118', 'SKBQ', 'KATL', '2026-06-01 18:00', '2026-06-02 00:15', 18, 18, 'Scheduled'),
+('FL-119', 'SKCC', 'TNCA', '2026-06-01 13:20', '2026-06-01 15:00', 19, 19, 'Delayed'),
+('FL-120', 'SKBO', 'EHAM', '2026-06-01 21:00', '2026-06-02 13:30', 20, 20, 'Scheduled'),
+('FL-121', 'SKRG', 'SABE', '2026-06-01 12:45', '2026-06-01 19:10', 21, 21, 'Scheduled'),
+('FL-122', 'SKCL', 'MMUN', '2026-06-01 11:25', '2026-06-01 15:40', 22, 22, 'Cancelled'),
+('FL-123', 'SKCG', 'KORD', '2026-06-01 22:00', '2026-06-02 05:45', 23, 23, 'Scheduled'),
+('FL-124', 'SKPE', 'SKSM', '2026-06-01 09:10', '2026-06-01 10:05', 24, 24, 'Arrived'),
+('FL-125', 'SKBO', 'RJTT', '2026-06-01 23:55', '2026-06-02 19:30', 25, 25, 'Scheduled'),
+('FL-126', 'SKBG', 'SKBO', '2026-06-01 06:30', '2026-06-01 07:20', 26, 26, 'In-flight'),
+('FL-127', 'SKRG', 'CYYZ', '2026-06-01 15:40', '2026-06-01 22:30', 27, 27, 'Scheduled'),
+('FL-128', 'SKCL', 'SCLP', '2026-06-01 18:50', '2026-06-01 23:20', 28, 28, 'Delayed'),
+('FL-129', 'SKBO', 'OMDB', '2026-06-01 19:45', '2026-06-02 17:10', 29, 29, 'Scheduled'),
+('FL-130', 'SKSM', 'SKCG', '2026-06-01 07:00', '2026-06-01 08:00', 30, 30, 'Arrived');
+
+SELECT model, capacity
+FROM aircraft
+WHERE aircraft_id BETWEEN 1 AND 10;
+
+SELECT model, capacity
+FROM aircraft
+WHERE model IN ('Airbus A320', 'Boeing 787-8', 'Embraer E190');
+
+SELECT first_name, last_name, email
+FROM passengers
+WHERE email LIKE '%@mail.com'
+ORDER BY last_name ASC;
+
+
+SELECT      --select to find the models of aircraft that have between 150 and 300 passenger capacity
+    model AS modelo,
+    capacity AS capacidad 
+FROM aircraft
+WHERE capacity BETWEEN 150 AND 300 
+    AND is_active=1
+ORDER BY capacity ASC;
+
+SELECT 
+    fly.flight_code AS codigo_vuelo,
+    fly.origin_icao AS aeropuerto_origen,
+    fly.destination_icao AS aeropuerto_destino
+FROM flights AS fly
+WHERE fly.destination_icao IN ('SKBO', 'SKRG', 'SKCL')
+    AND fly.flight_status = 'Scheduled';
+
+
+SELECT first_name, last_name, email
+FROM passengers
+WHERE email NOT LIKE '%@gmail.com'  
+ORDER BY last_name ASC;
+
+SELECT first_name, last_name, email, phone_number
+FROM passengers
+WHERE last_name LIKE 'Rod%'
+ORDER BY first_name ASC;
+
+-- SELECT comsposed 
+SELECT 
+    f.flight_code AS codigo_vuelo,
+    f.origin_icao AS aeropuerto_origen,
+    f.destination_icao AS aeropuerto_destino,
+    f.departure_at AS fecha_salida
+FROM flights AS f
+WHERE f.destination_icao IN ('SKBO', 'SKRG')
+    AND f.departure_at BETWEEN '2026-06-01 20:00' AND '2026-06-20 23:59'
+    AND f.flight_status IN ('Scheduled', 'Delayed')

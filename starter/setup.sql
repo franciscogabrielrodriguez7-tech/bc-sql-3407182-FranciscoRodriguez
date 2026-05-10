@@ -111,4 +111,3 @@ INSERT INTO crews (id, captain, copilot, attendants, base_airport) VALUES
     (5, 'Cap. Juan Rodríguez', 'Cop. Lucía Fernández', 4, 'Cartagena');
 
  
-
