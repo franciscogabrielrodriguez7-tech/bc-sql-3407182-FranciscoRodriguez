@@ -445,15 +445,7 @@ INSERT OR IGNORE INTO passengers (first_name, last_name, email, phone_number, pa
 ('Verónica', 'Cano', 'v.cano@mail.com', '300140', 'PAS-130');
 
 
-INSERT INTO flights (
-    flight_code,
-    origin_icao,
-    destination_icao,
-    departure_at,
-    arrival_at,
-    aircraft_id,
-    crew_id,
-    flight_status
+INSERT INTO flights ( flight_code, origin_icao, destination_icao, departure_at, arrival_at, aircraft_id, crew_id, flight_status
 ) VALUES
 ('FL-101', 'SKBO', 'KMIA', '2026-06-01 08:00', '2026-06-01 12:00', 1, 1, 'Scheduled'),
 ('FL-102', 'SKRG', 'SKCL', '2026-06-01 09:30', '2026-06-01 10:40', 2, 2, 'Scheduled'),
@@ -485,6 +477,7 @@ INSERT INTO flights (
 ('FL-128', 'SKCL', 'SCLP', '2026-06-01 18:50', '2026-06-01 23:20', 28, 28, 'Delayed'),
 ('FL-129', 'SKBO', 'OMDB', '2026-06-01 19:45', '2026-06-02 17:10', 29, 29, 'Scheduled'),
 ('FL-130', 'SKSM', 'SKCG', '2026-06-01 07:00', '2026-06-01 08:00', 30, 30, 'Arrived');
+
 
 SELECT model, capacity
 FROM aircraft
@@ -536,4 +529,95 @@ SELECT
 FROM flights AS f
 WHERE f.destination_icao IN ('SKBO', 'SKRG')
     AND f.departure_at BETWEEN '2026-06-01 20:00' AND '2026-06-20 23:59'
-    AND f.flight_status IN ('Scheduled', 'Delayed')
+    AND f.flight_status IN ('Scheduled', 'Delayed');
+
+
+
+===============================================================
+-- week 6 AGGREGATE FUNCTIONS (COUNT, SUM, AVG, MIN, MAX)
+-- =============================================================
+
+INSERT INTO flights (flight_code, origin_icao, destination_icao, departure_at, arrival_at, aircraft_id, crew_id, flight_status) VALUES
+-- Vuelos desde Bogotá (SKBO) a Medellín (SKRG) para probar el GROUP BY
+('FL-201', 'SKBO', 'SKRG', '2026-06-01 06:00:00', '2026-06-01 07:00:00', 1, 1, 'Arrived'),
+('FL-202', 'SKBO', 'SKRG', '2026-06-01 10:00:00', '2026-06-01 11:00:00', 2, 2, 'Scheduled'),
+('FL-203', 'SKBO', 'SKRG', '2026-06-01 14:00:00', '2026-06-01 15:00:00', 3, 3, 'Scheduled'),
+('FL-204', 'SKBO', 'SKRG', '2026-06-01 21:00:00', '2026-06-01 22:00:00', 4, 4, 'Scheduled'),
+('FL-205', 'SKBO', 'SKRG', '2026-06-05 08:30:00', '2026-06-05 09:30:00', 5, 5, 'Scheduled'),
+('FL-206', 'SKBO', 'SKCL', '2026-06-01 07:15:00', '2026-06-01 08:20:00', 6, 6, 'Arrived'),
+('FL-207', 'SKBO', 'SKCL', '2026-06-01 13:00:00', '2026-06-01 14:05:00', 7, 7, 'Scheduled'),
+('FL-208', 'SKBO', 'SKCL', '2026-06-10 18:45:00', '2026-06-10 19:50:00', 8, 8, 'Scheduled'),
+('FL-209', 'SKBO', 'KMIA', '2026-06-01 05:00:00', '2026-06-01 09:30:00', 9, 9, 'Arrived'),
+('FL-210', 'SKBO', 'KMIA', '2026-06-15 15:00:00', '2026-06-15 19:30:00', 1, 10, 'Scheduled'),
+('FL-211', 'SKBO', 'LEMD', '2026-06-01 20:00:00', '2026-06-02 11:00:00', 10, 11, 'Scheduled'),
+('FL-212', 'SKRG', 'SKBO', '2026-06-01 08:00:00', '2026-06-01 09:00:00', 2, 12, 'Arrived'),
+('FL-213', 'SKRG', 'SKBO', '2026-06-01 12:00:00', '2026-06-01 13:00:00', 3, 13, 'Scheduled'),
+('FL-214', 'SKRG', 'SKCL', '2026-06-01 16:30:00', '2026-06-01 17:15:00', 4, 14, 'Delayed'),
+('FL-215', 'SKRG', 'SKPE', '2026-06-01 10:00:00', '2026-06-01 10:45:00', 5, 15, 'Arrived'),
+('FL-216', 'SKCL', 'SKBO', '2026-06-01 06:00:00', '2026-06-01 07:10:00', 6, 16, 'Arrived'),
+('FL-217', 'SKCL', 'SKRG', '2026-06-02 09:00:00', '2026-06-02 10:00:00', 7, 17, 'Scheduled'),
+('FL-218', 'SKCL', 'MPTO', '2026-06-01 14:00:00', '2026-06-01 15:30:00', 8, 18, 'Scheduled'),
+('FL-219', 'SKBO', 'SKSM', '2026-06-02 11:00:00', '2026-06-02 12:30:00', 9, 19, 'Scheduled'),
+('FL-220', 'SKBO', 'SKSM', '2026-06-03 11:00:00', '2026-06-03 12:30:00', 10, 20, 'Scheduled'),
+('FL-221', 'SKBO', 'SKBQ', '2026-06-01 10:20:00', '2026-06-01 11:50:00', 1, 21, 'Arrived'),
+('FL-222', 'SKBO', 'SKBQ', '2026-06-01 22:30:00', '2026-06-02 00:00:00', 2, 22, 'Scheduled'),
+('FL-223', 'SKCG', 'SKBO', '2026-06-01 09:00:00', '2026-06-01 10:30:00', 3, 23, 'Arrived'),
+('FL-224', 'SKPE', 'SKBO', '2026-06-01 13:00:00', '2026-06-01 14:00:00', 4, 24, 'Scheduled'),
+('FL-225', 'SKCC', 'SKBO', '2026-06-01 15:45:00', '2026-06-01 17:15:00', 5, 25, 'Scheduled'),
+('FL-226', 'SKBO', 'SVMI', '2026-06-05 12:00:00', '2026-06-05 14:00:00', 6, 26, 'Scheduled'),
+('FL-227', 'SKBO', 'SAEZ', '2026-06-06 23:00:00', '2026-06-07 05:30:00', 7, 27, 'Scheduled'),
+('FL-228', 'SKBO', 'SKCG', '2026-06-01 17:00:00', '2026-06-01 18:30:00', 8, 28, 'Scheduled'),
+('FL-229', 'SKBO', 'SKCG', '2026-06-02 17:00:00', '2026-06-02 18:30:00', 9, 29, 'Scheduled'),
+('FL-230', 'SKBO', 'SKRG', '2026-06-30 23:30:00', '2026-07-01 00:30:00', 10, 30, 'Scheduled');
+
+SELECT COUNT(flight_code) AS total_vuelos
+FROM flights;
+
+SELECT COUNT(passport_id) AS total_pasajeros
+FROM passengers;
+
+SELECT COUNT(*) AS total_tripulantes
+FROM crews;
+
+SELECT COUNT(is_active) AS aviones_activos
+FROM aircraft
+WHERE is_active = 1;
+
+SELECT avg(capacity) AS capacidad_promedio
+FROM aircraft
+WHERE is_active = 1;
+
+SELECT AVG(attendants_count) AS promedio_asistentes
+FROM crews;
+
+SELECT SUM(capacity) AS capacidad_total
+FROM aircraft
+WHERE is_active = 1;
+
+PRAGMA TABLE_INFO(AIRCRAFT);
+
+SELECT SUM(attendants_count) AS total_asistentes
+FROM crews;
+
+SELECT 
+    departure_at AS fecha_salida, 
+    COUNT(flight_code) AS vuelos_del_dia,
+    destination_icao AS destino,
+    origin_icao AS origen
+FROM flights
+WHERE departure_at BETWEEN '2026-06-01 00:00' AND '2026-06-01 23:59'
+    AND origin_icao = 'SKBO'
+GROUP BY destination_icao
+ORDER BY fecha_salida ASC;
+
+SELECT 
+    destination_icao AS destino,
+    COUNT(flight_code) AS vuelos_del_mes,
+    MIN(departure_at) AS primer_vuelo,
+    MAX(departure_at) AS ultimo_vuelo
+FROM flights
+WHERE departure_at BETWEEN '2026-06-01 00:00' AND '2026-06-30 23:59'
+    AND origin_icao = 'SKBO'
+GROUP BY destination_icao
+HAVING vuelos_del_mes >= 2
+ORDER BY vuelos_del_mes DESC; 
