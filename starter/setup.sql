@@ -1,13 +1,16 @@
 -- ============================================
 -- PROYECTO SEMANAL: Conoce tu Dominio
--- Semana 01 — Introducción a Bases de Datos Relacionales
+-- Semana 07 - NULL y CONSTRAINTS
 -- Dominio: Empresa de Transporte Aéreo
 -- ============================================
 
 -- ============================================
 -- PASO 1: Crear la entidad principal (flights)
 -- ============================================
-
+DROP TABLE IF EXISTS flights;
+DROP TABLE IF EXISTS passengers;
+DROP TABLE IF EXISTS aircraft;
+DROP TABLE IF EXISTS crews;
 
 CREATE TABLE flights (
     id              INTEGER PRIMARY KEY,
