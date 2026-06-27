@@ -19,7 +19,7 @@ SELECT
     last_name AS apellido, 
     email
 FROM passengers
-WHERE email LIKE '%@mail.com'
+WHERE email LIKE '%@gmail.com' OR email LIKE '%@email.com'
 ORDER BY last_name ASC;
 
 
@@ -37,7 +37,8 @@ SELECT
     fly.destination_icao AS aeropuerto_destino
 FROM flights AS fly
 WHERE fly.destination_icao IN ('SKBO', 'SKRG', 'SKCL')
-    AND fly.flight_status = 'Scheduled';
+    AND fly.flight_status = 'Scheduled'
+ORDER BY fly.aircraft_id ASC;
 
 
 SELECT 
@@ -66,4 +67,15 @@ SELECT
 FROM flights AS f
 WHERE f.destination_icao IN ('SKBO', 'SKRG')
     AND f.departure_at BETWEEN '2026-06-01 20:00' AND '2026-06-20 23:59'
-    AND f.flight_status IN ('Scheduled', 'Delayed')
+    AND f.flight_status IN ('Scheduled', 'Delayed');
+
+SELECT 
+    f.flight_code AS codigo_vuelo, 
+    f.crew_id AS tripulacion,
+    f.flight_status AS estado,
+    f.origin_icao AS origen,
+    f.destination_icao AS destino
+FROM flights AS f
+WHERE (f.departure_at > 20260506153000 AND f.destination_icao = 'SKBO') --hora: 2026-05-06 15:30:00
+   OR f.flight_status  = 'In-flight';
+
