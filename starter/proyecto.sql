@@ -74,8 +74,9 @@ SELECT
     f.crew_id AS tripulacion,
     f.flight_status AS estado,
     f.origin_icao AS origen,
-    f.destination_icao AS destino
+    f.destination_icao AS destino,
+    departure_at AS hora_despegue
 FROM flights AS f
-WHERE (f.departure_at > 20260506153000 AND f.destination_icao = 'SKBO') --hora: 2026-05-06 15:30:00
-   OR f.flight_status  = 'In-flight';
+WHERE (f.departure_at > '2026-05-06 15:30:00' AND f.destination_icao = 'SKBO') --hora: 2026-05-06 15:30:00
+   OR (f.departure_at > '2026-05-06 14:30:00' AND f.destination_icao = 'MPTO');
 
