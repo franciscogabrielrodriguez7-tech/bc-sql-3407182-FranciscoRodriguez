@@ -2,15 +2,22 @@
 -- week 5 OPERATORS AND FILTERS (BETWEEN, IN, LIKE, NOT, OR) 
 -- =============================================================
 
-SELECT model, capacity
+SELECT 
+    model AS modelo_avion, 
+    capacity AS capacidad
 FROM aircraft
 WHERE aircraft_id BETWEEN 1 AND 10;
 
-SELECT model, capacity
+SELECT 
+    model AS modelo_avion, 
+    capacity AS capacidad
 FROM aircraft
 WHERE model IN ('Airbus A320', 'Boeing 787-8', 'Embraer E190');
 
-SELECT first_name, last_name, email
+SELECT 
+    first_name AS nombre, 
+    last_name AS apellido, 
+    email
 FROM passengers
 WHERE email LIKE '%@mail.com'
 ORDER BY last_name ASC;
@@ -33,12 +40,19 @@ WHERE fly.destination_icao IN ('SKBO', 'SKRG', 'SKCL')
     AND fly.flight_status = 'Scheduled';
 
 
-SELECT first_name, last_name, email
+SELECT 
+    first_name AS nombre, 
+    last_name AS apellido, 
+    email
 FROM passengers
 WHERE email NOT LIKE '%@gmail.com'  
 ORDER BY last_name ASC;
 
-SELECT first_name, last_name, email, phone_number
+SELECT 
+    first_name AS nombre, 
+    last_name AS apellido, 
+    email, 
+    phone_number AS telefono
 FROM passengers
 WHERE last_name LIKE 'Rod%'
 ORDER BY first_name ASC;
