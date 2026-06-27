@@ -1,114 +1,136 @@
--- ============================================
--- PROYECTO SEMANAL: Conoce tu Dominio
--- Semana 01 — Introducción a Bases de Datos Relacionales
--- Dominio: Empresa de Transporte Aéreo
--- ============================================
+-- CLEANUP: Ensure a clean state before schema creation
+DROP TABLE IF EXISTS flights;
+DROP TABLE IF EXISTS passengers;
+DROP TABLE IF EXISTS aircraft;
+DROP TABLE IF EXISTS crews;
 
--- ============================================
--- PASO 1: Crear la entidad principal (flights)
--- ============================================
+-- 1. AIRCRAFT: Assets and physical fleet data
+CREATE TABLE IF NOT EXISTS aircraft (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    model         TEXT NOT NULL,
+    capacity      INTEGER NOT NULL CHECK (capacity > 0),
+    registration  TEXT NOT NULL UNIQUE,
+    manufacturer  TEXT DEFAULT 'Unknown',
+    is_active     INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1))
+);
 
+-- 2. PASSENGERS: Customer and traveler information
+CREATE TABLE IF NOT EXISTS passengers (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name    TEXT NOT NULL,
+    last_name     TEXT NOT NULL,
+    email         TEXT UNIQUE CHECK (email LIKE '%@%.%'),
+    phone_number  TEXT,
+    passport_id   TEXT NOT NULL UNIQUE
+);
 
-CREATE TABLE flights (
-    id              INTEGER PRIMARY KEY,
-    flight_number   TEXT    NOT NULL,
-    origin          TEXT    NOT NULL,
-    destination     TEXT    NOT NULL,
-    departure_time  TEXT    NOT NULL,
-    arrival_time    TEXT    NOT NULL,
+-- 3. CREWS: Human resources assigned to flights
+CREATE TABLE IF NOT EXISTS crews (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    captain_name  TEXT NOT NULL,
+    copilot_name  TEXT NOT NULL,
+    attendants_count INTEGER NOT NULL DEFAULT 2 CHECK (attendants_count >= 0),
+    base_airport  TEXT NOT NULL
+);
+
+-- 4. FLIGHTS: Operational core linking assets and crew
+CREATE TABLE IF NOT EXISTS flights (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    flight_code     TEXT NOT NULL UNIQUE,
+    origin_icao     TEXT NOT NULL,      -- Using ICAO/IATA standard naming
+    destination_icao TEXT NOT NULL,
+    departure_at    TEXT NOT NULL,      -- ISO8601 strings (YYYY-MM-DD HH:MM:SS)
+    arrival_at      TEXT NOT NULL,
     aircraft_id     INTEGER,
-    crew_id         INTEGER
+    crew_id         INTEGER,
+    status          TEXT DEFAULT 'Scheduled'CHECK (status IN ('Scheduled', 'Delayed', 'In-flight', 'Arrived', 'Cancelled')),
+
+    CHECK (origin_icao <> destination_icao),
+    CHECK (length(origin_icao) = 4),
+    CHECK (length(destination_icao) = 4),
+    CHECK (arrival_at > departure_at),
+
+    FOREIGN KEY (aircraft_id) REFERENCES aircraft(id) ON DELETE SET NULL,
+    FOREIGN KEY (crew_id)     REFERENCES crews(id) ON DELETE SET NULL
 );
 
--- ============================================
--- PASO 2: Crear la entidad passengers
--- ============================================
+-- VERIFICATION
+.tables
+PRAGMA table_info(flights); -- verify table info
+-- PRAGMA is use to query, modify, and manage the database schema and settings. It is not a standard SQL command but is specific to SQLite.
 
-CREATE TABLE passengers (
-    id          INTEGER PRIMARY KEY,
-    name   TEXT    NOT NULL,
-    lastname   TEXT    NOT NULL,
-    email       TEXT,
-    phone       TEXT,
-    passport    TEXT    NOT NULL
-);
+-- new data that matches the new schema 
 
--- ============================================
--- PASO 3: Crear la entidad aircraft
--- ============================================
+-- AIRCRAFT 
+INSERT INTO aircraft (model, capacity, registration, manufacturer, is_active) VALUES
+('Airbus A320neo', 180, 'HK-5335', 'Airbus', 1),
+('Boeing 787-9', 250, 'HK-5521', 'Boeing', 1),
+('Boeing 737 MAX 8', 170, 'HK-5410', 'Boeing', 1),
+('Airbus A330-200', 252, 'HK-5190', 'Airbus', 1),
+('ATR 72-600', 72, 'HK-5041', 'ATR', 1),
+('Embraer E195-E2', 132, 'HK-5288', 'Embraer', 1),
+('Airbus A321LR', 206, 'HK-5399', 'Airbus', 1),
+('Boeing 777-300ER', 396, 'HK-5600', 'Boeing', 1),
+('Cessna 208 Caravan', 12, 'HK-4820', 'Cessna', 1),
+('Airbus A319', 144, 'HK-5212', 'Airbus', 0), 
+('Boeing 747-8i', 410, 'HK-5700', 'Boeing', 1),
+('Bombardier CRJ-900', 90, 'HK-5122', 'Bombardier', 1),
+('Airbus A350-900', 315, 'HK-5450', 'Airbus', 1),
+('Boeing 767-300F', 120, 'HK-5000C', 'Boeing', 1),
+('Airbus A320neo', 180, 'HK-5336', 'Airbus', 1);
 
-CREATE TABLE aircraft (
-    id              INTEGER PRIMARY KEY,
-    model           TEXT    NOT NULL,
-    capacity        INTEGER NOT NULL,
-    registration    TEXT    NOT NULL,
-    manufacturer    TEXT
-);
+-- PASSENGERS 
+INSERT INTO passengers (first_name, last_name, email, phone_number, passport_id) VALUES
+('Francisco', 'Rodriguez', 'f.rodriguez@email.com', '+573101234567', 'PAS-998877'),
+('Laura', 'Gomez', 'laura.gomez@aero.co', '+573004567890', 'PAS-112233'),
+('Carlos', 'Mendoza', 'c.mendoza@gmail.com', '+573209876543', 'PAS-445566'),
+('Ana', 'Martinez', 'ana.mtz@outlook.com', '+13057891234', 'PAS-778899'),
+('John', 'Smith', 'j.smith@provider.net', '+442071234567', 'PAS-001122'),
+('Maria', 'Curie', 'm.curie@science.org', '+33140506070', 'PAS-334455'),
+('Sofia', 'Castillo', 'sofi.cas@email.com', '+573155554433', 'PAS-667788'),
+('Diego', 'Sanz', 'd.sanz@viajes.es', '+34912345678', 'PAS-889900'),
+('Elena', 'Russo', 'e.russo@it.com', '+39061234567', 'PAS-223311'),
+('Julian', 'Bernal', 'jbernal@empresa.com', '+573112223344', 'PAS-556644'),
+('Camila', 'Vargas', 'c.vargas@estudiante.edu', '+573149998877', 'PAS-121234'),
+('Robert', 'Wilson', 'r.wilson@tech.com', '+14155550101', 'PAS-787890'),
+('Yuki', 'Tanaka', 'y.tanaka@jp.com', '+81312345678', 'PAS-343456'),
+('Luis', 'Ortega', 'l.ortega@freelance.com', '+525512345678', 'PAS-909012'),
+('Isabella', 'Conti', 'i.conti@br.com', '+551198765432', 'PAS-565678');
 
--- ============================================
--- PASO 4: Crear la entidad crews
--- ============================================
+-- CREWS 
+INSERT INTO crews (captain_name, copilot_name, attendants_count, base_airport) VALUES
+('Andres Silva', 'Luis Martinez', 4, 'SKBO'), -- Bogota
+('Maria Fernandez', 'Juan Gomez', 6, 'SKRG'), -- Medellin
+('Carlos Ramirez', 'Ana Torres', 3, 'SKCL'), -- Cali
+('Roberto Cano', 'Paula Ortiz', 5, 'SKBO'),
+('Felipe Rios', 'Sonia Lopez', 4, 'SKCG'), -- Cartagena
+('Ricardo Vega', 'Marta Soler', 2, 'SKBQ'), -- Barranquilla
+('Ignacio Ruiz', 'Elena Gil', 8, 'KJFK'), -- New York
+('Oscar Diaz', 'Lucia Paz', 4, 'SKBO'),
+('Victor Hugo', 'Diana Prince', 5, 'LEMD'), -- Madrid
+('Samuel Kim', 'Javier Peña', 4, 'MPTO'), -- Panama
+('Beatriz Pinzon', 'Nicolas Mora', 3, 'SKBO'),
+('Armando Mendoza', 'Marcela Valencia', 6, 'SKRG'),
+('Hugo Lombardi', 'Patricia Fernandez', 4, 'SKCL'),
+('Daniel Valencia', 'Mario Calderon', 4, 'SKBO'),
+('Betty Suarez', 'Freddy Contreras', 2, 'SKPE');
 
-CREATE TABLE crews (
-    id              INTEGER PRIMARY KEY,
-    captain         TEXT    NOT NULL,
-    copilot         TEXT    NOT NULL,
-    attendants      INTEGER NOT NULL,
-    base_airport    TEXT
-);
+-- FLIGHTS
+INSERT INTO flights (flight_code, origin_icao, destination_icao, departure_at, arrival_at, aircraft_id, crew_id, status) VALUES
+('AT1001', 'SKBO', 'KMIA', '2026-05-01 06:00:00', '2026-05-01 10:30:00', 1, 1, 'Scheduled'),
+('AT2005', 'SKRG', 'LEMD', '2026-05-01 18:00:00', '2026-05-02 10:00:00', 2, 2, 'Scheduled'),
+('AT3002', 'SKCL', 'MPTO', '2026-05-02 09:15:00', '2026-05-02 11:00:00', 3, 3, 'Scheduled'),
+('AT4044', 'SKBO', 'KJFK', '2026-05-02 23:30:00', '2026-05-03 05:45:00', 4, 4, 'Scheduled'),
+('AT5010', 'SKCG', 'SKBO', '2026-05-03 12:00:00', '2026-05-03 13:30:00', 5, 5, 'Scheduled'),
+('AT1122', 'SKBQ', 'KMIA', '2026-05-03 07:00:00', '2026-05-03 09:50:00', 6, 6, 'Scheduled'),
+('AT9901', 'SKBO', 'SPJC', '2026-05-04 14:00:00', '2026-05-04 17:15:00', 7, 8, 'Delayed'),
+('AT7788', 'KJFK', 'LEMD', '2026-05-04 21:00:00', '2026-05-05 09:00:00', 8, 7, 'Scheduled'),
+('AT8855', 'SKBO', 'SABE', '2026-05-05 01:00:00', '2026-05-05 07:30:00', 13, 11, 'Scheduled'),
+('AT6633', 'SKRG', 'SKBO', '2026-05-05 10:00:00', '2026-05-05 11:00:00', 12, 12, 'In-flight'),
+('AT2211', 'MPTO', 'SKCL', '2026-05-06 15:30:00', '2026-05-06 17:00:00', 3, 10, 'Scheduled'),
+('AT4400', 'LEMD', 'SKBO', '2026-05-06 23:50:00', '2026-05-07 04:20:00', 13, 9, 'Scheduled'),
+('AT5522', 'SKBO', 'SKCG', '2026-05-07 08:00:00', '2026-05-07 09:30:00', 1, 14, 'Scheduled'),
+('AT3311', 'SKPE', 'SKBO', '2026-05-07 13:00:00', '2026-05-07 14:00:00', 5, 15, 'Arrived'),
+('AT1100', 'SKBO', 'KLAX', '2026-05-08 22:00:00', '2026-05-09 05:00:00', 11, 4, 'Scheduled');
 
--- ============================================
--- PASO 5: Insertar datos de prueba
--- ============================================
-
--- Vuelos
-INSERT INTO flights (id, flight_number, origin, destination, departure_time, arrival_time, aircraft_id, crew_id) VALUES
-    (1, 'AV101', 'Bogotá', 'Miami', '2026-05-01 08:00', '2026-05-01 13:00', 1, 1),
-    (2, 'AV102', 'Medellín', 'Madrid', '2026-05-02 16:00', '2026-05-03 08:00', 2, 2),
-    (3, 'AV103', 'Cali', 'Cancún', '2026-05-04 09:30', '2026-05-04 12:00', 3, 3),
-    (4, 'AV104', 'Bogotá', 'Buenos Aires', '2026-05-05 22:00', '2026-05-06 06:00', 4, 4),
-    (5, 'AV105', 'Cartagena', 'Panamá', '2026-05-06 11:00', '2026-05-06 12:30', 5, 5),
-    (6, 'AV106', 'Bogotá', 'Lima', '2026-05-07 07:00', '2026-05-07 10:00', 6, 6),
-    (7, 'AV107', 'Medellín', 'New York', '2026-05-08 14:00', '2026-05-08 21:00', 7, 7),
-    (8, 'AV108', 'Cali', 'Quito', '2026-05-09 06:00', '2026-05-09 07:30', 8, 8),
-    (9, 'AV109', 'Bogotá', 'Los Ángeles', '2026-05-10 23:00', '2026-05-11 06:00', 9, 9),
-    (10, 'AV110', 'Barranquilla', 'Orlando', '2026-05-11 12:00', '2026-05-11 16:00', 10, 10);
-
--- Pasajeros
-INSERT INTO passengers (id, name, lastname, email, phone, passport) VALUES
-    (1, 'Laura', 'Gómez', 'laura.gomez@email.com', '3001234567', 'P123456'),
-    (2, 'Carlos', 'Pérez', 'carlos.perez@email.com', '3017654321', 'P654321'),
-    (3, 'Ana', 'Torres', 'ana.torres@email.com', '3029876543', 'P789012'),
-    (4, 'Juan', 'Rodríguez', 'juan.rodriguez@email.com', '3034567890', 'P345678'),
-    (5, 'María', 'López', 'maria.lopez@email.com', '3041122334', 'P901234'),
-    (6, 'Pedro', 'Sánchez', 'pedro.sanchez@email.com', '3052233445', 'P112233'),
-    (7, 'Lucía', 'Fernández', 'lucia.fernandez@email.com', '3063344556', 'P223344'),
-    (8, 'Andrés', 'Ramírez', 'andres.ramirez@email.com', '3074455667', 'P334455'),
-    (9, 'Sofía', 'Herrera', 'sofia.herrera@email.com', '3085566778', 'P445566'),
-    (10, 'Diego', 'Castro', 'diego.castro@email.com', '3096677889', 'P556677'),
-    (11, 'Valentina', 'Ruiz', 'valentina.ruiz@email.com', '3107788990', 'P667788'),
-    (12, 'Miguel', 'Ángel', 'miguel.angel@email.com', '3118899001', 'P778899'),
-    (13, 'Camila', 'Vargas', 'camila.vargas@email.com', '3129900112', 'P889900'),
-    (14, 'Julián', 'Morales', 'julian.morales@email.com', '3131011123', 'P990011'),
-    (15, 'Paula', 'Castaño', 'paula.castano@email.com', '3142122234','P101112');
-
--- Aviones
-INSERT INTO aircraft (id, model, capacity, registration, manufacturer) VALUES
-    (1, 'Airbus A320', 180, 'HK-3201', 'Airbus'),
-    (2, 'Boeing 787', 250, 'HK-7872', 'Boeing'),
-    (3, 'Embraer E190', 100, 'HK-1903', 'Embraer'),
-    (4, 'Boeing 737', 160, 'HK-7374', 'Boeing'),
-    (5, 'Airbus A350', 300, 'HK-3505', 'Airbus'),
-    (6, 'ATR 72', 70, 'HK-7276', 'ATR'),
-    (7, 'Bombardier CRJ900', 90, 'HK-9097', 'Bombardier');
-
--- Tripulaciones
-INSERT INTO crews (id, captain, copilot, attendants, base_airport) VALUES
-    (1, 'Cap. Andrés Silva', 'Cop. Luis Martínez', 4, 'Bogotá'),
-    (2, 'Cap. María Fernández', 'Cop. Juan Gómez', 5, 'Medellín'),
-    (3, 'Cap. Carlos Ramírez', 'Cop. Ana Torres', 3, 'Cali'),
-    (4, 'Cap. Laura Gómez', 'Cop. Pedro Sánchez', 6, 'Bogotá'),
-    (5, 'Cap. Juan Rodríguez', 'Cop. Lucía Fernández', 4, 'Cartagena');
-
- 
 
