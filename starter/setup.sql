@@ -1,116 +1,307 @@
--- ============================================
--- PROYECTO SEMANAL: Conoce tu Dominio
--- Semana 07 - NULL y CONSTRAINTS
--- Dominio: Empresa de Transporte Aéreo
--- ============================================
-
--- ============================================
--- PASO 1: Crear la entidad principal (flights)
--- ============================================
+-- CLEANUP: Ensure a clean state before schema creation
 DROP TABLE IF EXISTS flights;
 DROP TABLE IF EXISTS passengers;
 DROP TABLE IF EXISTS aircraft;
 DROP TABLE IF EXISTS crews;
 
-CREATE TABLE flights (
-    id              INTEGER PRIMARY KEY,
-    flight_number   TEXT    NOT NULL,
-    origin          TEXT    NOT NULL,
-    destination     TEXT    NOT NULL,
-    departure_time  TEXT    NOT NULL,
-    arrival_time    TEXT    NOT NULL,
+-- 1. AIRCRAFT: Assets and physical fleet data
+CREATE TABLE IF NOT EXISTS aircraft (
+    aircraft_id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    model         TEXT NOT NULL,
+    capacity      INTEGER NOT NULL CHECK (capacity > 0),
+    registration  TEXT NOT NULL UNIQUE,
+    manufacturer  TEXT DEFAULT 'Unknown',
+    is_active     INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1))
+);
+
+-- 2. PASSENGERS: Customer and traveler information
+CREATE TABLE IF NOT EXISTS passengers (
+    pass_id  INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name    TEXT NOT NULL,
+    last_name     TEXT NOT NULL,
+    email         TEXT UNIQUE CHECK (email LIKE '%@%.%'),
+    phone_number  TEXT,
+    passport_id   TEXT NOT NULL UNIQUE
+);
+
+-- 3. CREWS: Human resources assigned to flights
+CREATE TABLE IF NOT EXISTS crews (
+    crew_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    captain_name  TEXT NOT NULL,
+    copilot_name  TEXT NOT NULL,
+    attendants_count INTEGER NOT NULL DEFAULT 2 CHECK (attendants_count >= 0),
+    base_airport  TEXT NOT NULL
+);
+
+-- 4. FLIGHTS: Operational core linking assets and crew
+CREATE TABLE IF NOT EXISTS flights (
+    flight_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    flight_code     TEXT NOT NULL UNIQUE,
+    origin_icao     TEXT NOT NULL,      -- Using ICAO/IATA standard naming
+    destination_icao TEXT NOT NULL,
+    departure_at    TEXT NOT NULL,      -- ISO8601 strings (YYYY-MM-DD HH:MM:SS)
+    arrival_at      TEXT NOT NULL,
     aircraft_id     INTEGER,
-    crew_id         INTEGER
+    crew_id         INTEGER,
+    flight_status   TEXT DEFAULT 'Scheduled'CHECK (flight_status IN ('Scheduled', 'Delayed', 'In-flight', 'Arrived', 'Cancelled')),
+
+    CHECK (origin_icao <> destination_icao),
+    CHECK (length(origin_icao) = 4),
+    CHECK (length(destination_icao) = 4),
+    CHECK (arrival_at > departure_at),
+
+    FOREIGN KEY (aircraft_id) REFERENCES aircraft(aircraft_id) ON DELETE SET NULL,
+    FOREIGN KEY (crew_id)     REFERENCES crews(crews_id) ON DELETE SET NULL
 );
 
--- ============================================
--- PASO 2: Crear la entidad passengers
--- ============================================
+-- VERIFICATION
+-- .tables
+-- PRAGMA table_info(flights); -- verify table info
+-- PRAGMA is use to query, modify, and manage the database schema and settings. It is not a standard SQL command but is specific to SQLite.
 
-CREATE TABLE passengers (
-    id          INTEGER PRIMARY KEY,
-    name   TEXT    NOT NULL,
-    lastname   TEXT    NOT NULL,
-    email       TEXT,
-    phone       TEXT,
-    passport    TEXT    NOT NULL
-);
+-- AIRCRAFT 
+INSERT INTO aircraft (model, capacity, registration, manufacturer, is_active) VALUES
+('Boeing 737-800', 162, 'HK-5001', 'Boeing', 1), ('Airbus A320', 180, 'HK-5002', 'Airbus', 1),
+('Boeing 787-8', 250, 'HK-5003', 'Boeing', 1), ('Embraer E190', 100, 'HK-5004', 'Embraer', 1),
+('Airbus A330', 252, 'HK-5005', 'Airbus', 1), ('ATR 72-600', 70, 'HK-5006', 'ATR', 1),
+('Boeing 777-200', 310, 'HK-5007', 'Boeing', 1), ('Airbus A321', 220, 'HK-5008', 'Airbus', 1),
+('Cessna 208', 12, 'HK-5009', 'Cessna', 1), ('Bombardier CRJ700', 78, 'HK-5010', 'Bombardier', 0),
+('Airbus A350', 325, 'HK-5011', 'Airbus', 1), ('Boeing 747-400', 416, 'HK-5012', 'Boeing', 1),
+('Gulfstream G650', 19, 'HK-5013', 'Gulfstream', 1), ('Dash 8 Q400', 76, 'HK-5014', 'De Havilland', 1),
+('Boeing 737 MAX 9', 178, 'HK-5015', 'Boeing', 1), ('Airbus A319', 144, 'HK-5016', 'Airbus', 1),
+('Embraer E175', 76, 'HK-5017', 'Embraer', 1), ('Airbus A220', 135, 'HK-5018', 'Airbus', 1),
+('Boeing 767-300', 210, 'HK-5019', 'Boeing', 0), ('Pilatus PC-12', 9, 'HK-5020', 'Pilatus', 1),
+('Boeing 787-9', 250, 'HK-5521', 'Boeing', 1),('Boeing 737 MAX 8', 170, 'HK-5410', 'Boeing', 1),
+('Airbus A330-200', 252, 'HK-5190', 'Airbus', 1),('ATR 72-600', 72, 'HK-5041', 'ATR', 1),
+('Embraer E195-E2', 132, 'HK-5288', 'Embraer', 1),('Airbus A321LR', 206, 'HK-5399', 'Airbus', 1),
+('Boeing 777-300ER', 396, 'HK-5600', 'Boeing', 1),('Cessna 208 Caravan', 12, 'HK-4820', 'Cessna', 1),
+('Airbus A319', 144, 'HK-5212', 'Airbus', 0), ('Boeing 747-8i', 410, 'HK-5700', 'Boeing', 1),
+('Bombardier CRJ-900', 90, 'HK-5122', 'Bombardier', 1),('Airbus A350-900', 315, 'HK-5450', 'Airbus', 1),
+('Boeing 767-300F', 120, 'HK-5000C', 'Boeing', 1),('Airbus A320neo', 180, 'HK-5336', 'Airbus', 1),
+('Airbus A320neo', 180, 'HK-5335', 'Airbus', 1),( 'Airbus A320', 180, 'HK-3201', 'Airbus', 0),
+( 'Boeing 737-800', 189, 'HK-4521', 'Boeing', 1),( 'Airbus A321neo', 220, 'HK-7820', 'Airbus', 1),
+( 'Boeing 787-9 Dreamliner', 296, 'HK-9901', 'Boeing', 1),( 'ATR 72-600', 72, 'HK-2105', 'ATR', 1),
+( 'Embraer E190', 114, 'HK-3344', 'Embraer', 1),( 'Bombardier CRJ900', 90, 'HK-7750', 'Bombardier', 0),
+( 'Airbus A330-300', 300, 'HK-8822', 'Airbus', 1),
+( 'Boeing 777-300ER', 396, 'HK-6610', 'Boeing', 1),( 'Cessna 172', 4, 'HK-1001', 'Cessna', 1),
+( 'Airbus A350-900', 325, 'HK-5502', 'Airbus', 1),( 'Boeing 747-8', 467, 'HK-7478', 'Boeing', 0),
+( 'Embraer E175', 88, 'HK-1700', 'Embraer', 1),( 'ATR 42-500', 48, 'HK-4250', 'ATR', 1),
+( 'Boeing 737 MAX 8', 210, 'HK-8080', 'Boeing', 1),( 'Airbus A220-300', 145, 'HK-2230', 'Airbus', 1),
+( 'Bombardier Dash 8 Q400', 82, 'HK-8400', 'Bombardier', 1),( 'Boeing 767-300F', 269, 'HK-7630', 'Boeing', 0),
+( 'Airbus A319', 156, 'HK-3199', 'Airbus', 1),( 'Gulfstream G650', 18, 'HK-6500', 'Gulfstream', 1),
+( 'Pilatus PC-12', 9, 'HK-1212', 'Pilatus', 1),( 'Boeing 737-700', 149, 'HK-7377', 'Boeing', 0),
+( 'Airbus A321XLR', 244, 'HK-3215', 'Airbus', 1),( 'Lockheed C-130 Hercules', 92, 'HK-1300', 'Lockheed Martin', 1),
+( 'Dassault Falcon 8X', 16, 'HK-8008', 'Dassault', 1),( 'Beechcraft King Air 350', 11, 'HK-3501', 'Beechcraft', 1),
+( 'Antonov An-124', 88, 'HK-1240', 'Antonov', 0),( 'Boeing 757-200', 239, 'HK-7520', 'Boeing', 1),
+( 'Airbus BelugaXL', 220, 'HK-XL01', 'Airbus', 0),( 'Sukhoi Superjet 100', 98, 'HK-SS10', 'Sukhoi', 1);
 
--- ============================================
--- PASO 3: Crear la entidad aircraft
--- ============================================
 
-CREATE TABLE aircraft (
-    id              INTEGER PRIMARY KEY,
-    model           TEXT    NOT NULL,
-    capacity        INTEGER NOT NULL,
-    registration    TEXT    NOT NULL,
-    manufacturer    TEXT
-);
+-- PASSENGERS 
+INSERT INTO passengers (first_name, last_name, email, phone_number, passport_id) VALUES
+('Francisco', 'Rodríguez', 'francisco.rodriguez@email.com', '+573101234567', 'PAS-100001'),
+('Laura', 'Gómez', 'laura.gomez@email.com', '+573102345678', 'PAS-100002'),
+('Carlos', 'Mendoza', 'carlos.mendoza@email.com', '+573103456789', 'PAS-100003'),
+('Ana', 'Martínez', 'ana.martinez@email.com', '+573104567890', 'PAS-100004'),
+('Juan', 'Pérez', 'juan.perez@email.com', '+573105678901', 'PAS-100005'),
+('María', 'López', 'maria.lopez@email.com', '+573106789012', 'PAS-100006'),
+('Sofía', 'Castillo', 'sofia.castillo@email.com', '+573107890123', 'PAS-100007'),
+('Diego', 'Herrera', 'diego.herrera@email.com', '+573108901234', 'PAS-100008'),
+('Camila', 'Torres', 'camila.torres@email.com', '+573109012345', 'PAS-100009'),
+('Felipe', 'Ramírez', 'felipe.ramirez@email.com', '+573110123456', 'PAS-100010'),
+('Valentina', 'Morales', 'valentina.morales@email.com', '+573111234567', 'PAS-100011'),
+('Sebastián', 'Rojas', 'sebastian.rojas@email.com', '+573112345678', 'PAS-100012'),
+('Natalia', 'Jiménez', 'natalia.jimenez@email.com', '+573113456789', 'PAS-100013'),
+('Ricardo', 'Vega', 'ricardo.vega@email.com', '+573114567890', 'PAS-100014'),
+('Paula', 'Suárez', 'paula.suarez@email.com', '+573115678901', 'PAS-100015'),
+('Esteban', 'Navarro', 'esteban.navarro@email.com', '+573116789012', 'PAS-100016'),
+('Melissa', 'Cano', 'melissa.cano@email.com', '+573117890123', 'PAS-100017'),
+('Leonardo', 'Muñoz', 'leonardo.munoz@email.com', '+573118901234', 'PAS-100018'),
+('Gabriela', 'Cruz', 'gabriela.cruz@email.com', '+573119012345', 'PAS-100019'),
+('Héctor', 'Fuentes', 'hector.fuentes@email.com', '+573120123456', 'PAS-100020'),
+('John', 'Smith', 'john.smith@email.com', '+12025550101', 'PAS-100021'),
+('Emily', 'Johnson', 'emily.johnson@email.com', '+12025550102', 'PAS-100022'),
+('Michael', 'Brown', 'michael.brown@email.com', '+12025550103', 'PAS-100023'),
+('Emma', 'Wilson', 'emma.wilson@email.com', '+447700900101', 'PAS-100024'),
+('Oliver', 'Taylor', 'oliver.taylor@email.com', '+447700900102', 'PAS-100025'),
+('Sophie', 'Martin', 'sophie.martin@email.com', '+33612345678', 'PAS-100026'),
+('Lucas', 'Dubois', 'lucas.dubois@email.com', '+33612345679', 'PAS-100027'),
+('Marco', 'Rossi', 'marco.rossi@email.com', '+393331234567', 'PAS-100028'),
+('Giulia', 'Bianchi', 'giulia.bianchi@email.com', '+393331234568', 'PAS-100029'),
+('Yuki', 'Tanaka', 'yuki.tanaka@email.com', '+818012345678', 'PAS-100030'),
+('Haruto', 'Sato', 'haruto.sato@email.com', '+818012345679', 'PAS-100031'),
+('Akira', 'Suzuki', 'akira.suzuki@email.com', '+818012345680', 'PAS-100032'),
+('Isabella', 'Conti', 'isabella.conti@email.com', '+5511998765432', 'PAS-100033'),
+('Mateo', 'Silva', 'mateo.silva@email.com', '+5511998765433', 'PAS-100034'),
+('Lucía', 'Fernández', 'lucia.fernandez@email.com', '+5491123456789', 'PAS-100035'),
+('Tomás', 'Aguilar', 'tomas.aguilar@email.com', '+5491123456790', 'PAS-100036'),
+('Daniela', 'Ortega', 'daniela.ortega@email.com', '+525512345678', 'PAS-100037'),
+('Luis', 'Mendoza', 'luis.mendoza@email.com', '+525512345679', 'PAS-100038'),
+('Sara', 'León', 'sara.leon@email.com', '+34600111222', 'PAS-100039'),
+('Pedro', 'Álvarez', 'pedro.alvarez@email.com', '+34600111223', 'PAS-100040');
 
--- ============================================
--- PASO 4: Crear la entidad crews
--- ============================================
+-- CREWS 
+INSERT INTO crews (captain_name, copilot_name, attendants_count, base_airport) VALUES
+('Capt. Andres Silva',      'Cop. Luis Martinez',   4, 'SKBO'), -- Bogota
+('Capt. Maria Fernandez',   'Cop. Juan Gomez',      6, 'SKRG'), -- Medellin
+('Capt. Carlos Ramirez',    'Cop. Ana Torres',      3, 'SKCL'), -- Cali
+('Capt. Roberto Cano',      'Cop. Paula Ortiz',     5, 'SKBO'),
+('Capt. Felipe Rios',       'Cop. Sonia Lopez',     4, 'SKCG'), -- Cartagena
+('Capt. Ricardo Vega',      'Cop. Marta Soler',     2, 'SKBQ'), -- Barranquilla
+('Capt. Ignacio Ruiz',      'Cop. Elena Gil',       8, 'KJFK'), -- New York
+('Capt. Oscar Diaz',        'Cop. Lucia Paz',       4, 'SKBO'),
+('Capt. Victor Hugo',       'Cop. Diana Prince',    5, 'LEMD'), -- Madrid
+('Capt. Samuel Kim',        'Cop. Javier Peña',     4, 'MPTO'), -- Panama
+('Capt. Beatriz Pinzon',    'Cop. Nicolas Mora',    3, 'SKBO'),
+('Capt. Armando Mendoza',   'Cop. Marcela Valencia',6, 'SKRG'),
+('Capt. Hugo Lombardi',     'Cop. Patricia Fernandez',4, 'SKCL'),
+('Capt. Daniel Valencia',   'Cop. Mario Calderon',  4, 'SKBO'),
+('Capt. Betty Suarez',      'Cop. Freddy Contreras',2, 'SKPE'),
+('Cap. Andrés Silva',       'Cop. Luis Martínez',   4, 'SKBO'),
+('Cap. María González',     'Cop. Felipe Torres',   5, 'SKRG'),
+('Cap. Juan Esteban Ruiz',  'Cop. Camila Herrera',  3, 'SKCL'),
+('Cap. Sebastián Rojas',    'Cop. Daniel Castro',   6, 'SKBO'),
+('Cap. Laura Mendoza',      'Cop. Nicolás Vega',    4, 'SKCG'),
+('Cap. Ricardo Pérez',      'Cop. Andrea López',    2, 'SKBQ'),
+('Cap. Valentina Ramírez',  'Cop. Javier Morales',  5, 'SKBO'),
+('Cap. Carlos Méndez',      'Cop. Paula Romero',    3, 'SKRG'),
+('Cap. Esteban Navarro',    'Cop. Sara Jiménez',    4, 'SKCL'),
+('Cap. Miguel Ángel Duarte','Cop. Lina Parra',      6, 'SKBO'),
+('Cap. José Cárdenas',      'Cop. Tatiana León',    5, 'SKCG'),
+('Cap. Cristian Vargas',    'Cop. Ángela Ortiz',    4, 'SKBQ'),
+('Cap. Mauricio Salazar',   'Cop. Juliana Pineda',  3, 'SKBO'),
+('Cap. Diego Herrera',      'Cop. Karen Suárez',    2, 'SKRG'),
+('Cap. Fernando Beltrán',   'Cop. Alejandra Cruz',  5, 'SKCL'),
+('Cap. Sergio Molina',      'Cop. Iván Restrepo',   4, 'SKBO'),
+('Cap. Catalina Gil',       'Cop. Andrés Mejía',    6, 'SKCG'),
+('Cap. Óscar Rincón',       'Cop. Natalia Duarte',  3, 'SKBQ'),
+('Cap. Jorge Villalba',     'Cop. Melissa Cano',    4, 'SKBO'),
+('Cap. Héctor Fuentes',     'Cop. Diana Calderón',  5, 'SKRG'),
+( 'Cap. Andrés Silva',      'Cop. Luis Martínez',   4, 'SKBO'),
+( 'Cap. María González',    'Cop. Felipe Torres',   5, 'SKRG'),
+( 'Cap. Juan Esteban Ruiz', 'Cop. Camila Herrera',  3, 'SKCL'),
+( 'Cap. Sebastián Rojas',   'Cop. Daniel Castro',   6, 'SKCG'),
+( 'Cap. Laura Mendoza',     'Cop. Nicolás Vega',    4, 'SKBQ'),
+( 'Cap. Ricardo Pérez',     'Cop. Andrea López',    5, 'SKBO'),
+( 'Cap. Valentina Ramírez', 'Cop. Javier Morales',  4, 'SKPE'),
+( 'Cap. Carlos Méndez',     'Cop. Paula Romero',    3, 'SKBG'),
+( 'Cap. Esteban Navarro',   'Cop. Sara Jiménez',    5, 'SKSM'),
+( 'Cap. Miguel Ángel Duarte','Cop. Lina Parra',     4, 'SKBO'),
+( 'Cap. José Cárdenas',     'Cop. Tatiana León',    6, 'SKCL'),
+( 'Cap. Cristian Vargas',   'Cop. Ángela Ortiz',    4, 'SKRG'),
+( 'Cap. Mauricio Salazar',  'Cop. Juliana Pineda',  5, 'SKCG'),
+( 'Cap. Diego Herrera',     'Cop. Karen Suárez',    3, 'SKMR'),
+( 'Cap. Fernando Beltrán',  'Cop. Alejandra Cruz',  4, 'SKBO'),
+( 'Cap. Sergio Molina',     'Cop. Iván Restrepo',   5, 'SKPS'),
+( 'Cap. Catalina Gil',      'Cop. Andrés Mejía',    4, 'SKAR'),
+( 'Cap. Óscar Rincón',      'Cop. Natalia Duarte',  6, 'SKBQ'),
+( 'Cap. Jorge Villalba',    'Cop. Melissa Cano',    3, 'SKCC'),
+( 'Cap. Héctor Fuentes',    'Cop. Diana Calderón',  4, 'SKBO'),
+( 'Cap. Manuel Quintero',   'Cop. Paula Sánchez',   5, 'SKRG'),
+( 'Cap. Andrés Cepeda',     'Cop. Verónica Ruiz',   4, 'SKCL'),
+( 'Cap. Tomás Aguilar',     'Cop. Sofía Valencia',  6, 'SKCG'),
+( 'Cap. Eduardo Patiño',    'Cop. Gabriela Mora',   3, 'SKPE'),
+( 'Cap. Álvaro Benítez',    'Cop. Natalia Vélez',   5, 'SKSM'),
+( 'Cap. Felipe Arango',     'Cop. Isabel Torres',   4, 'SKBO'),
+( 'Cap. Leonardo Muñoz',    'Cop. Camilo Franco',   5, 'SKBG'),
+( 'Cap. Julián Acosta',     'Cop. Marcela Arias',   4, 'SKCL'),
+( 'Cap. Víctor Solano',     'Cop. Daniela Nieto',   6, 'SKRG'),
+( 'Cap. Ramiro Casas',      'Cop. Laura Nieto',     3, 'SKBO');
 
-CREATE TABLE crews (
-    id              INTEGER PRIMARY KEY,
-    captain         TEXT    NOT NULL,
-    copilot         TEXT    NOT NULL,
-    attendants      INTEGER NOT NULL,
-    base_airport    TEXT
-);
+-- FLIGHTS
+INSERT INTO flights (flight_code, origin_icao, destination_icao, departure_at, arrival_at, aircraft_id, crew_id, flight_status) VALUES
+('FL-01', 'SKBO', 'KMIA', '2026-05-01 06:00:00', '2026-05-01 10:30:00', 1, 1, 'Scheduled'),
+('FL-02', 'SKRG', 'LEMD', '2026-05-01 18:00:00', '2026-05-02 10:00:00', 2, 2, 'Scheduled'),
+('FL-03', 'SKCL', 'MPTO', '2026-05-02 09:15:00', '2026-05-02 11:00:00', 3, 3, 'Scheduled'),
+('FL-04', 'SKBO', 'KJFK', '2026-05-02 23:30:00', '2026-05-03 05:45:00', 4, 4, 'Scheduled'),
+('FL-05', 'SKCG', 'SKBO', '2026-05-03 12:00:00', '2026-05-03 13:30:00', 5, 5, 'Scheduled'),
+('FL-06', 'SKBQ', 'KMIA', '2026-05-03 07:00:00', '2026-05-03 09:50:00', 6, 6, 'Scheduled'),
+('FL-07', 'SKBO', 'SPJC', '2026-05-04 14:00:00', '2026-05-04 17:15:00', 7, 8, 'Delayed'),
+('FL-08', 'KJFK', 'LEMD', '2026-05-04 21:00:00', '2026-05-05 09:00:00', 8, 7, 'Scheduled'),
+('FL-09', 'SKBO', 'SABE', '2026-05-05 01:00:00', '2026-05-05 07:30:00', 13, 11, 'Scheduled'),
+('FL-10', 'SKRG', 'SKBO', '2026-05-05 10:00:00', '2026-05-05 11:00:00', 12, 12, 'In-flight'),
+('FL-11', 'MPTO', 'SKCL', '2026-05-06 15:30:00', '2026-05-06 17:00:00', 3, 10, 'Scheduled'),
+('FL-12', 'LEMD', 'SKBO', '2026-05-06 23:50:00', '2026-05-07 04:20:00', 13, 9, 'Scheduled'),
+('FL-13', 'SKBO', 'SKCG', '2026-05-07 08:00:00', '2026-05-07 09:30:00', 1, 14, 'Scheduled'),
+('FL-14', 'SKPE', 'SKBO', '2026-05-07 13:00:00', '2026-05-07 14:00:00', 5, 15, 'Arrived'),
+('FL-15', 'SKBO', 'KLAX', '2026-05-08 22:00:00', '2026-05-09 05:00:00', 11, 4, 'Scheduled'),
+('FL-16', 'SKBO', 'KMIA', '2026-06-01 08:00:00', '2026-06-01 12:00:00', 1, 1, 'Scheduled'),
+('FL-17', 'SKBO', 'LEMD', '2026-06-01 10:00:00', '2026-06-01 22:00:00', 2, 2, 'Scheduled'),
+('FL-18', 'SKRG', 'MPTO', '2026-06-01 14:00:00', '2026-06-01 16:00:00', 3, 3, 'Delayed'),
+('FL-19', 'SKCL', 'SABE', '2026-06-01 16:00:00', '2026-06-01 22:00:00', 4, 4, 'Scheduled'),
+('FL-20', 'SKBO', 'KJFK', '2026-06-01 20:00:00', '2026-06-02 04:00:00', 5, 5, 'Scheduled'),
+('FL-21', 'KMIA', 'SKBO', '2026-06-02 08:00:00', '2026-06-02 12:00:00', 1, 6, 'Scheduled'),
+('FL-22', 'LEMD', 'SKBO', '2026-06-02 10:00:00', '2026-06-02 22:00:00', 2, 7, 'Scheduled'),
+('FL-23', 'MPTO', 'SKRG', '2026-06-02 14:00:00', '2026-06-02 16:00:00', 3, 8, 'Scheduled'),
+('FL-24', 'SABE', 'SKCL', '2026-06-02 16:00:00', '2026-06-02 22:00:00', 4, 9, 'Scheduled'),
+('FL-25', 'KJFK', 'SKBO', '2026-06-02 20:00:00', '2026-06-03 04:00:00', 5, 10, 'Scheduled'),
+('FL-26', 'SKBO', 'SKRG', '2026-06-03 07:00:00', '2026-06-03 08:00:00', 6, 11, 'Scheduled'),
+('FL-27', 'SKRG', 'SKBO', '2026-06-03 09:00:00', '2026-06-03 10:00:00', 6, 12, 'Scheduled'),
+('FL-28', 'SKBO', 'SKCL', '2026-06-03 11:00:00', '2026-06-03 12:00:00', 7, 13, 'Cancelled'),
+('FL-29', 'SKCL', 'SKBO', '2026-06-03 13:00:00', '2026-06-03 14:00:00', 7, 14, 'Scheduled'),
+('FL-30', 'SKBO', 'SKCG', '2026-06-03 15:00:00', '2026-06-03 16:30:00', 8, 15, 'Scheduled'),
+('FL-31', 'SKCG', 'SKBO', '2026-06-03 17:30:00', '2026-06-03 19:00:00', 8, 16, 'Scheduled'),
+('FL-32', 'SKBO', 'SKBQ', '2026-06-03 20:00:00', '2026-06-03 21:30:00', 9, 17, 'Scheduled'),
+('FL-33', 'SKBQ', 'SKBO', '2026-06-03 22:30:00', '2026-06-04 00:00:00', 9, 18, 'Scheduled'),
+('FL-34', 'SKBO', 'LEMD', '2026-06-04 06:00:00', '2026-06-04 18:00:00', 11, 19, 'Scheduled'),
+('FL-35', 'LEMD', 'SKBO', '2026-06-05 06:00:00', '2026-06-05 18:00:00', 11, 20, 'Scheduled'),
+('FL-101', 'SKBO', 'KMIA', '2026-06-01 08:00:00', '2026-06-01 12:00:00', 1, 1, 'Scheduled'),
+('FL-102', 'SKRG', 'SKCL', '2026-06-01 09:30:00', '2026-06-01 10:40:00', 2, 2, 'Scheduled'),
+('FL-103', 'SKBO', 'SEQM', '2026-06-01 07:15:00', '2026-06-01 09:10:00', 3, 3, 'In-flight'),
+('FL-104', 'SKCG', 'MPTO', '2026-06-01 11:00:00', '2026-06-01 12:25:00', 4, 4, 'Scheduled'),
+('FL-105', 'SKBQ', 'TNCM', '2026-06-01 13:45:00', '2026-06-01 16:30:00', 5, 5, 'Delayed'),
+('FL-106', 'SKBO', 'KLAX', '2026-06-01 15:00:00', '2026-06-01 22:00:00', 6, 6, 'Scheduled'),
+('FL-107', 'SKSM', 'SKBO', '2026-06-01 06:50:00', '2026-06-01 08:15:00', 7, 7, 'Arrived'),
+('FL-108', 'SKCL', 'MMMX', '2026-06-01 10:20:00', '2026-06-01 15:40:00', 8, 8, 'Scheduled'),
+('FL-109', 'SKBO', 'LEMD', '2026-06-01 17:30:00', '2026-06-02 08:45:00', 9, 9, 'Scheduled'),
+('FL-110', 'SKPE', 'SKRG', '2026-06-01 12:10:00', '2026-06-01 13:00:00', 10, 10, 'Cancelled'),
+('FL-111', 'SKBO', 'LFPG', '2026-06-01 20:00:00', '2026-06-02 11:20:00', 11, 11, 'Scheduled'),
+('FL-112', 'SKRG', 'KJFK', '2026-06-01 14:00:00', '2026-06-01 20:30:00', 12, 12, 'Delayed'),
+('FL-113', 'SKCG', 'MUHA', '2026-06-01 09:00:00', '2026-06-01 11:50:00', 13, 13, 'Scheduled'),
+('FL-114', 'SKMR', 'SKBO', '2026-06-01 07:45:00', '2026-06-01 09:00:00', 14, 14, 'In-flight'),
+('FL-115', 'SKBO', 'SBGR', '2026-06-01 16:20:00', '2026-06-01 23:10:00', 15, 15, 'Scheduled'),
+('FL-116', 'SKPS', 'SKCL', '2026-06-01 05:50:00', '2026-06-01 07:00:00', 16, 16, 'Arrived'),
+('FL-117', 'SKAR', 'SKBO', '2026-06-01 08:35:00', '2026-06-01 09:40:00', 17, 17, 'Scheduled'),
+('FL-118', 'SKBQ', 'KATL', '2026-06-01 18:00:00', '2026-06-02 00:15:00', 18, 18, 'Scheduled'),
+('FL-119', 'SKCC', 'TNCA', '2026-06-01 13:20:00', '2026-06-01 15:00:00', 19, 19, 'Delayed'),
+('FL-120', 'SKBO', 'EHAM', '2026-06-01 21:00:00', '2026-06-02 13:30:00', 20, 20, 'Scheduled'),
+('FL-121', 'SKRG', 'SABE', '2026-06-01 12:45:00', '2026-06-01 19:10:00', 21, 21, 'Scheduled'),
+('FL-122', 'SKCL', 'MMUN', '2026-06-01 11:25:00', '2026-06-01 15:40:00', 22, 22, 'Cancelled'),
+('FL-123', 'SKCG', 'KORD', '2026-06-01 22:00:00', '2026-06-02 05:45:00', 23, 23, 'Scheduled'),
+('FL-124', 'SKPE', 'SKSM', '2026-06-01 09:10:00', '2026-06-01 10:05:00', 24, 24, 'Arrived'),
+('FL-125', 'SKBO', 'RJTT', '2026-06-01 23:55:00', '2026-06-02 19:30:00', 25, 25, 'Scheduled'),
+('FL-126', 'SKBG', 'SKBO', '2026-06-01 06:30:00', '2026-06-01 07:20:00', 26, 26, 'In-flight'),
+('FL-127', 'SKRG', 'CYYZ', '2026-06-01 15:40:00', '2026-06-01 22:30:00', 27, 27, 'Scheduled'),
+('FL-128', 'SKCL', 'SCLP', '2026-06-01 18:50:00', '2026-06-01 23:20:00', 28, 28, 'Delayed'),
+('FL-129', 'SKBO', 'OMDB', '2026-06-01 19:45:00', '2026-06-02 17:10:00', 29, 29, 'Scheduled'),
+('FL-130', 'SKSM', 'SKCG', '2026-06-01 07:00:00', '2026-06-01 08:00:00', 30, 30, 'Arrived'),
+('FL-201', 'SKBO', 'SKRG', '2026-06-01 06:00:00', '2026-06-01 07:00:00', 1, 1, 'Arrived'),
+('FL-202', 'SKBO', 'SKRG', '2026-06-01 10:00:00', '2026-06-01 11:00:00', 2, 2, 'Scheduled'),
+('FL-203', 'SKBO', 'SKRG', '2026-06-01 14:00:00', '2026-06-01 15:00:00', 3, 3, 'Scheduled'),
+('FL-204', 'SKBO', 'SKRG', '2026-06-01 21:00:00', '2026-06-01 22:00:00', 4, 4, 'Scheduled'),
+('FL-205', 'SKBO', 'SKRG', '2026-06-05 08:30:00', '2026-06-05 09:30:00', 5, 5, 'Scheduled'),
+('FL-206', 'SKBO', 'SKCL', '2026-06-01 07:15:00', '2026-06-01 08:20:00', 6, 6, 'Arrived'),
+('FL-207', 'SKBO', 'SKCL', '2026-06-01 13:00:00', '2026-06-01 14:05:00', 7, 7, 'Scheduled'),
+('FL-208', 'SKBO', 'SKCL', '2026-06-10 18:45:00', '2026-06-10 19:50:00', 8, 8, 'Scheduled'),
+('FL-209', 'SKBO', 'KMIA', '2026-06-01 05:00:00', '2026-06-01 09:30:00', 9, 9, 'Arrived'),
+('FL-210', 'SKBO', 'KMIA', '2026-06-15 15:00:00', '2026-06-15 19:30:00', 1, 10, 'Scheduled'),
+('FL-211', 'SKBO', 'LEMD', '2026-06-01 20:00:00', '2026-06-02 11:00:00', 10, 11, 'Scheduled'),
+('FL-212', 'SKRG', 'SKBO', '2026-06-01 08:00:00', '2026-06-01 09:00:00', 2, 12, 'Arrived'),
+('FL-213', 'SKRG', 'SKBO', '2026-06-01 12:00:00', '2026-06-01 13:00:00', 3, 13, 'Scheduled'),
+('FL-214', 'SKRG', 'SKCL', '2026-06-01 16:30:00', '2026-06-01 17:15:00', 4, 14, 'Delayed'),
+('FL-215', 'SKRG', 'SKPE', '2026-06-01 10:00:00', '2026-06-01 10:45:00', 5, 15, 'Arrived'),
+('FL-216', 'SKCL', 'SKBO', '2026-06-01 06:00:00', '2026-06-01 07:10:00', 6, 16, 'Arrived'),
+('FL-217', 'SKCL', 'SKRG', '2026-06-02 09:00:00', '2026-06-02 10:00:00', 7, 17, 'Scheduled'),
+('FL-218', 'SKCL', 'MPTO', '2026-06-01 14:00:00', '2026-06-01 15:30:00', 8, 18, 'Scheduled'),
+('FL-219', 'SKBO', 'SKSM', '2026-06-02 11:00:00', '2026-06-02 12:30:00', 9, 19, 'Scheduled'),
+('FL-220', 'SKBO', 'SKSM', '2026-06-03 11:00:00', '2026-06-03 12:30:00', 10, 20, 'Scheduled'),
+('FL-221', 'SKBO', 'SKBQ', '2026-06-01 10:20:00', '2026-06-01 11:50:00', 1, 21, 'Arrived'),
+('FL-222', 'SKBO', 'SKBQ', '2026-06-01 22:30:00', '2026-06-02 00:00:00', 2, 22, 'Scheduled'),
+('FL-223', 'SKCG', 'SKBO', '2026-06-01 09:00:00', '2026-06-01 10:30:00', 3, 23, 'Arrived'),
+('FL-224', 'SKPE', 'SKBO', '2026-06-01 13:00:00', '2026-06-01 14:00:00', 4, 24, 'Scheduled'),
+('FL-225', 'SKCC', 'SKBO', '2026-06-01 15:45:00', '2026-06-01 17:15:00', 5, 25, 'Scheduled'),
+('FL-226', 'SKBO', 'SVMI', '2026-06-05 12:00:00', '2026-06-05 14:00:00', 6, 26, 'Scheduled'),
+('FL-227', 'SKBO', 'SAEZ', '2026-06-06 23:00:00', '2026-06-07 05:30:00', 7, 27, 'Scheduled'),
+('FL-228', 'SKBO', 'SKCG', '2026-06-01 17:00:00', '2026-06-01 18:30:00', 8, 28, 'Scheduled'),
+('FL-229', 'SKBO', 'SKCG', '2026-06-02 17:00:00', '2026-06-02 18:30:00', 9, 29, 'Scheduled'),
+('FL-230', 'SKBO', 'SKRG', '2026-06-30 23:30:00', '2026-07-01 00:30:00', 10, 30, 'Scheduled');
 
--- ============================================
--- PASO 5: Insertar datos de prueba
--- ============================================
-
--- Vuelos
-INSERT INTO flights (id, flight_number, origin, destination, departure_time, arrival_time, aircraft_id, crew_id) VALUES
-    (1, 'AV101', 'Bogotá', 'Miami', '2026-05-01 08:00', '2026-05-01 13:00', 1, 1),
-    (2, 'AV102', 'Medellín', 'Madrid', '2026-05-02 16:00', '2026-05-03 08:00', 2, 2),
-    (3, 'AV103', 'Cali', 'Cancún', '2026-05-04 09:30', '2026-05-04 12:00', 3, 3),
-    (4, 'AV104', 'Bogotá', 'Buenos Aires', '2026-05-05 22:00', '2026-05-06 06:00', 4, 4),
-    (5, 'AV105', 'Cartagena', 'Panamá', '2026-05-06 11:00', '2026-05-06 12:30', 5, 5),
-    (6, 'AV106', 'Bogotá', 'Lima', '2026-05-07 07:00', '2026-05-07 10:00', 6, 6),
-    (7, 'AV107', 'Medellín', 'New York', '2026-05-08 14:00', '2026-05-08 21:00', 7, 7),
-    (8, 'AV108', 'Cali', 'Quito', '2026-05-09 06:00', '2026-05-09 07:30', 8, 8),
-    (9, 'AV109', 'Bogotá', 'Los Ángeles', '2026-05-10 23:00', '2026-05-11 06:00', 9, 9),
-    (10, 'AV110', 'Barranquilla', 'Orlando', '2026-05-11 12:00', '2026-05-11 16:00', 10, 10);
-
--- Pasajeros
-INSERT INTO passengers (id, name, lastname, email, phone, passport) VALUES
-    (1, 'Laura', 'Gómez', 'laura.gomez@email.com', '3001234567', 'P123456'),
-    (2, 'Carlos', 'Pérez', 'carlos.perez@email.com', '3017654321', 'P654321'),
-    (3, 'Ana', 'Torres', 'ana.torres@email.com', '3029876543', 'P789012'),
-    (4, 'Juan', 'Rodríguez', 'juan.rodriguez@email.com', '3034567890', 'P345678'),
-    (5, 'María', 'López', 'maria.lopez@email.com', '3041122334', 'P901234'),
-    (6, 'Pedro', 'Sánchez', 'pedro.sanchez@email.com', '3052233445', 'P112233'),
-    (7, 'Lucía', 'Fernández', 'lucia.fernandez@email.com', '3063344556', 'P223344'),
-    (8, 'Andrés', 'Ramírez', 'andres.ramirez@email.com', '3074455667', 'P334455'),
-    (9, 'Sofía', 'Herrera', 'sofia.herrera@email.com', '3085566778', 'P445566'),
-    (10, 'Diego', 'Castro', 'diego.castro@email.com', '3096677889', 'P556677'),
-    (11, 'Valentina', 'Ruiz', 'valentina.ruiz@email.com', '3107788990', 'P667788'),
-    (12, 'Miguel', 'Ángel', 'miguel.angel@email.com', '3118899001', 'P778899'),
-    (13, 'Camila', 'Vargas', 'camila.vargas@email.com', '3129900112', 'P889900'),
-    (14, 'Julián', 'Morales', 'julian.morales@email.com', '3131011123', 'P990011'),
-    (15, 'Paula', 'Castaño', 'paula.castano@email.com', '3142122234','P101112');
-
--- Aviones
-INSERT INTO aircraft (id, model, capacity, registration, manufacturer) VALUES
-    (1, 'Airbus A320', 180, 'HK-3201', 'Airbus'),
-    (2, 'Boeing 787', 250, 'HK-7872', 'Boeing'),
-    (3, 'Embraer E190', 100, 'HK-1903', 'Embraer'),
-    (4, 'Boeing 737', 160, 'HK-7374', 'Boeing'),
-    (5, 'Airbus A350', 300, 'HK-3505', 'Airbus'),
-    (6, 'ATR 72', 70, 'HK-7276', 'ATR'),
-    (7, 'Bombardier CRJ900', 90, 'HK-9097', 'Bombardier');
-
--- Tripulaciones
-INSERT INTO crews (id, captain, copilot, attendants, base_airport) VALUES
-    (1, 'Cap. Andrés Silva', 'Cop. Luis Martínez', 4, 'Bogotá'),
-    (2, 'Cap. María Fernández', 'Cop. Juan Gómez', 5, 'Medellín'),
-    (3, 'Cap. Carlos Ramírez', 'Cop. Ana Torres', 3, 'Cali'),
-    (4, 'Cap. Laura Gómez', 'Cop. Pedro Sánchez', 6, 'Bogotá'),
-    (5, 'Cap. Juan Rodríguez', 'Cop. Lucía Fernández', 4, 'Cartagena');
-
- 
