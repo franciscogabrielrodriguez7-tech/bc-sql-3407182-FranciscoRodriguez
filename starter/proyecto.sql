@@ -50,6 +50,12 @@ CREATE TABLE IF NOT EXISTS flights (
     crew_id         INTEGER,
     status          TEXT DEFAULT 'Scheduled' 
                     CHECK (status IN ('Scheduled', 'Delayed', 'In-flight', 'Arrived', 'Cancelled')),
+    
+    CHECK (origin_icao <> destination_icao),
+    CHECK (length(origin_icao) = 4),
+    CHECK (length(destination_icao) = 4),
+    CHECK (arrival_at > departure_at),
+    
     FOREIGN KEY (aircraft_id) REFERENCES aircraft(id) ON DELETE SET NULL,
     FOREIGN KEY (crew_id)     REFERENCES crews(id) ON DELETE SET NULL
 );
